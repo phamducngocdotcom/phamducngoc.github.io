@@ -1,2 +1,24 @@
-# phamducngoc.github.io
-Thông tin Phạm Đức Ngọc sáng lập website https://phamducngoc.com
+# Phạm Đức Ngọc - Founder & Developer
+
+Chào mừng bạn đến với trang giới thiệu của **Phạm Đức Ngọc**, người sáng lập website **[phamducngoc.com](https://phamducngoc.com)** và trang dự án **[phamducngoc.github.io](https://phamducngocdotcom.github.io/phamducngoc.github.io/)**.
+
+Tôi đam mê phát triển các công cụ hữu ích và chia sẻ kiến thức về công nghệ, đặc biệt là trong lĩnh vực năng lượng mặt trời.
+
+---
+
+## 🔧 Các Công Cụ Miễn Phí
+
+Dưới đây là danh sách các công cụ trực tuyến miễn phí mà tôi đã phát triển để phục vụ cộng đồng:
+
+1.  **[Chuyển đổi từ W sang Wh (Watt sang Watt-giờ)](https://phamducngocdotcom.github.io/phamducngoc.github.io/w-to-wh.html)**
+    * Một công cụ đơn giản giúp bạn nhanh chóng tính toán lượng điện năng tiêu thụ từ công suất của thiết bị.
+
+2.  **[Tạo mã QR có chèn Logo](https://phamducngocdotcom.github.io/phamducngoc.github.io/qr-code.html)**
+    * Tạo mã QR cá nhân hóa bằng cách chèn logo hoặc hình ảnh của riêng bạn vào giữa mã. Hoàn toàn miễn phí.
+
+3.  **[Chuyển đổi từ Ah sang kWh](https://phamducngocdotcom.github.io/phamducngoc.github.io/ah-kwh.html)**
+    * Công cụ hữu ích giúp chuyển đổi dung lượng pin từ Ampe-giờ (Ah) sang Kilowatt-giờ (kWh) một cách chính xác.
+
+---
+
+Cảm ơn bạn đã ghé thăm!
