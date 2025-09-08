@@ -19,6 +19,7 @@ Dưới đây là danh sách các công cụ trực tuyến miễn phí mà tôi
 3.  **[Chuyển đổi từ Ah sang kWh](https://phamducngocdotcom.github.io/phamducngoc.github.io/ah-kwh.html)**
     * Công cụ hữu ích giúp chuyển đổi dung lượng pin từ Ampe-giờ (Ah) sang Kilowatt-giờ (kWh) một cách chính xác.
 
----
+4. **[Game Đua Vịt] (https://phamducngocdotcom.github.io/phamducngoc.github.io/gameduavit.html)**
+  * Tạo một game nhỏ giúp giáo viên có thể chọn thí sinh lên bảng một cách ngẫu nhiên
 
 Cảm ơn bạn đã ghé thăm!
