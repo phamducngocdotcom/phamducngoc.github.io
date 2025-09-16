@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trò Chơi Đua Vịt - phamducngoc.com</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chosen Palette: Sunny Day Palette -->
-    <!-- Application Structure Plan: The layout remains the same (top controls, bottom racetrack). The primary enhancement is purely visual, focusing on the duck elements themselves to meet the user's request for more "liveliness." -->
-    <!-- Visualization & Content Choices: Goal: Make the ducks more animated. Method: Two CSS keyframe animations, `bob` (for vertical movement) and `wobble` (for rotation), are created. These are applied to the duck elements. A `.racing` class is added to the racetrack via JavaScript when the race starts. This class triggers faster, more intense animations in the CSS. Interaction: The liveliness is a passive visual enhancement that responds to the race state (idle vs. racing). Justification: This approach directly addresses the user's request, significantly improving visual feedback and engagement without altering the core game logic. Using randomized animation delays in JS prevents the ducks from moving in unnatural unison. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -80,29 +76,30 @@
 </head>
 <body class="bg-blue-50 text-gray-800 flex flex-col items-center min-h-screen">
 
-    <!-- Bảng điều khiển ở trên -->
+    <div class="w-full flex justify-center py-4 bg-blue-50">
+        <a href="https://phamducngoc.com" target="_blank" rel="noopener noreferrer" title="Truy cập phamducngoc.com">
+            <img src="https://phamducngoc.com/wp-content/uploads/2025/08/pham-duc-ngoc.png" alt="Logo Pham Duc Ngoc" class="h-16 w-auto transition-transform hover:scale-105">
+        </a>
+    </div>
+
     <div class="w-full bg-white/80 backdrop-blur-sm p-4 rounded-b-xl shadow-lg border-b border-gray-200 z-10">
         <div class="max-w-7xl mx-auto">
             <h1 class="text-3xl font-bold text-center text-yellow-500 mb-3" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">🏁 Bảng Điều Khiển Đua Vịt 🏁</h1>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <!-- Cột thêm tên -->
                 <div class="md:col-span-1">
                     <label for="nameInput" class="block mb-1 font-semibold text-gray-600">Thêm tên:</label>
                     <textarea id="nameInput" class="w-full h-24 p-2 border border-gray-300 rounded-md shadow-inner focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Vịt Vàng&#10;Vịt Xanh&#10;..."></textarea>
                 </div>
-                <!-- Cột cài đặt -->
                 <div class="md:col-span-1">
                     <label for="timeInput" class="block mb-1 font-semibold text-gray-600">Thời gian cuộc đua (giây):</label>
                     <input type="number" id="timeInput" value="30" min="5" max="300" class="w-full p-2 border border-gray-300 rounded-md shadow-inner focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                 </div>
-                <!-- Cột tạo vịt -->
                 <div class="md:col-span-1 flex flex-col items-center">
-                     <button id="updateDucksButton" class="w-full max-w-xs px-6 py-3 bg-blue-500 text-white font-bold text-lg rounded-lg shadow-md hover:bg-blue-600 active:bg-blue-700 transform hover:scale-105 transition-transform duration-200">
+                    <button id="updateDucksButton" class="w-full max-w-xs px-6 py-3 bg-blue-500 text-white font-bold text-lg rounded-lg shadow-md hover:bg-blue-600 active:bg-blue-700 transform hover:scale-105 transition-transform duration-200">
                         Tạo Vịt Đua
                     </button>
                     <p id="duckCount" class="text-center mt-2 text-gray-600 font-medium">Số vịt: 0</p>
                 </div>
-                <!-- Cột bắt đầu/reset -->
                 <div class="md:col-span-1 flex justify-center space-x-2">
                     <button id="startButton" class="flex-1 px-4 py-3 bg-green-500 text-white font-bold text-xl rounded-lg shadow-lg hover:bg-green-600 active:bg-green-700 transform hover:scale-105 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100" disabled>
                         Bắt Đầu
@@ -115,7 +112,6 @@
         </div>
     </div>
 
-    <!-- Đường đua chiếm phần còn lại -->
     <div class="w-full flex-1 p-4">
         <div id="racetrack" class="racetrack w-full h-full rounded-lg shadow-2xl border-8 border-yellow-300 flex flex-col p-4 justify-center items-center">
             <div id="initialMessage" class="text-center text-white text-2xl font-bold">
@@ -334,7 +330,7 @@
         
         window.addEventListener('resize', () => {
            if (ducks.length > 0) {
-                updateDucks();
+               updateDucks();
            }
         });
 
