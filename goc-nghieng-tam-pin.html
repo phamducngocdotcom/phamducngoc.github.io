@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Trực Quan Hóa & Tính Toán Pin Mặt Trời</title>
+    <style>
+        :root {
+            --primary-color: #005a9e;
+            --secondary-color: #ffc400;
+            --background-color: #f4f7f9;
+            --text-color: #333;
+            --card-bg-color: #ffffff;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+       .container {
+            max-width: 1200px;
+            width: 100%;
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+
+        #visualization-panel {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid var(--border-color);
+        }
+
+       .sun-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sun-icon {
+            width: 80px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        #solar-panel-icon {
+            width: 200px;
+            transition: transform 0.5s ease-in-out;
+            z-index: 2;
+        }
+        
+       .compass {
+            margin-top: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        #control-panel {
+            flex: 1.5;
+            min-width: 400px;
+            padding: 20px;
+        }
+
+       .control-group {
+            margin-bottom: 25px;
+        }
+
+       .control-group h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 5px;
+        }
+
+       .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+       .form-field {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        
+        input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+       .optimization-options {
+            display: flex;
+            gap: 15px;
+        }
+
+       .optimization-options label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: normal;
+        }
+
+        #output-panel {
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #bbdefb;
+        }
+
+       .output-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+       .output-item {
+            background-color: var(--card-bg-color);
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+       .output-item.label {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+       .output-item.value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+       .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+       .tooltip.tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85em;
+            font-weight: normal;
+        }
+
+       .tooltip:hover.tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 800px) {
+            main {
+                flex-direction: column;
+            }
+            #visualization-panel {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Công Cụ Trực Quan Hóa & Tính Toán Pin Mặt Trời</h1>
+        </header>
+        <main>
+            <div id="visualization-panel">
+                <div class="sun-container">
+                    <img id="sun-icon" src="[https://raw.githubusercontent.com/phamducngocdotcom/phamducngoc.github.io/refs/heads/main/iconmattroi.png](https://raw.githubusercontent.com/phamducngocdotcom/phamducngoc.github.io/refs/heads/main/iconmattroi.png)" alt="Mặt trời">
+                    <img id="solar-panel-icon" src="[https://raw.githubusercontent.com/phamducngocdotcom/phamducngoc.github.io/refs/heads/main/tam-pin-nang-luong-mat-troi.png](https://raw.githubusercontent.com/phamducngocdotcom/phamducngoc.github.io/refs/heads/main/tam-pin-nang-luong-mat-troi.png)" alt="Tấm pin mặt trời">
+                </div>
+                <div class="compass">
+                    <p>Hướng Nam (180°)</p>
+                </div>
+            </div>
+            <div id="control-panel">
+                <div class="control-group">
+                    <h3>1. Cấu hình Hệ thống</h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="province-select">Chọn Tỉnh/Thành phố</label>
+                            <select id="province-select"></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="panel-power">Công suất Tấm pin (Wp)</label>
+                            <input type="number" id="panel-power" value="450">
+                        </div>
+                        <div class="form-field">
+                            <label for="panel-count">Tổng số Tấm pin</label>
+                            <input type="number" id="panel-count" value="10">
+                        </div>
+                         <div class="form-field">
+                            <label for="total-power">Tổng Công suất (kWp)</label>
+                            <input type="text" id="total-power" readonly>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="system-voltage">Điện áp DC Hệ thống (V) 
+                                <span class="tooltip">?
+                                    <span class="tooltiptext">Điện áp không ảnh hưởng đến tổng sản lượng (kWh) nhưng cần thiết để tính Ampe-giờ (Ah) cho việc lựa chọn ắc quy và bộ điều khiển sạc.</span>
+                                </span>
+                            </label>
+                            <select id="system-voltage">
+                                <option value="12">12V</option>
+                                <option value="24">24V</option>
+                                <option value="48" selected>48V</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Mục tiêu Tối ưu hóa</label>
+                            <div class="optimization-options">
+                                <label><input type="radio" name="optimization" value="yearly" checked> Quanh năm</label>
+                                <label><input type="radio" name="optimization" value="summer"> Mùa hè</label>
+                                <label><input type="radio" name="optimization" value="winter"> Mùa đông</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group" id="output-panel">
+                    <h3>2. Kết quả Ước tính</h3>
+                     <div class="output-grid">
+                        <div class="output-item">
+                            <div class="label">Góc Phương vị</div>
+                            <div class="value" id="output-azimuth">--</div>
+                        </div>
+                        <div class="output-item">
+                            <div class="label">Góc Nghiêng</div>
+                            <div class="value" id="output-tilt">--</div>
+                        </div>
+                        <div class="output-item">
+                            <div class="label">Sản lượng / ngày</div>
+                            <div class="value" id="output-daily-kwh">--</div>
+                        </div>
+                        <div class="output-item">
+                            <div class="label">Sản lượng / tháng</div>
+                            <div class="value" id="output-monthly-kwh">--</div>
+                        </div>
+                        <div class="output-item">
+                            <div class="label">Sản lượng / năm</div>
+                            <div class="value" id="output-yearly-kwh">--</div>
+                        </div>
+                        <div class="output-item">
+                            <div class="label">Ampe-giờ / ngày</div>
+                            <div class="value" id="output-daily-ah">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const provinceData =;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const provinceSelect = document.getElementById('province-select');
+            const panelPowerInput = document.getElementById('panel-power');
+            const panelCountInput = document.getElementById('panel-count');
+            const totalPowerInput = document.getElementById('total-power');
+            const systemVoltageSelect = document.getElementById('system-voltage');
+            const optimizationRadios = document.querySelectorAll('input[name="optimization"]');
+            
+            const solarPanelIcon = document.getElementById('solar-panel-icon');
+            
+            const outputAzimuth = document.getElementById('output-azimuth');
+            const outputTilt = document.getElementById('output-tilt');
+            const outputDailyKwh = document.getElementById('output-daily-kwh');
+            const outputMonthlyKwh = document.getElementById('output-monthly-kwh');
+            const outputYearlyKwh = document.getElementById('output-yearly-kwh');
+            const outputDailyAh = document.getElementById('output-daily-ah');
+
+            // Populate province dropdown
+            provinceData.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province.name;
+                option.textContent = province.name;
+                provinceSelect.appendChild(option);
+            });
+            // Set default to a southern province for better initial visual
+            provinceSelect.value = "TP. Hồ Chí Minh";
+
+            function updateCalculations() {
+                // 1. Get User Inputs
+                const selectedProvinceName = provinceSelect.value;
+                const panelPower = parseFloat(panelPowerInput.value) |
+
+| 0;
+                const panelCount = parseInt(panelCountInput.value) |
+
+| 0;
+                const systemVoltage = parseInt(systemVoltageSelect.value);
+                const optimizationTarget = document.querySelector('input[name="optimization"]:checked').value;
+
+                // 2. Lookup Data
+                const province = provinceData.find(p => p.name === selectedProvinceName);
+                if (!province) return;
+
+                const latitude = province.latitude;
+                let psh;
+                switch (optimizationTarget) {
+                    case 'summer':
+                        psh = province.psh_summer;
+                        break;
+                    case 'winter':
+                        psh = province.psh_winter;
+                        break;
+                    case 'yearly':
+                    default:
+                        psh = province.psh_yearly;
+                        break;
+                }
+
+                // 3. Calculate Tilt Angle
+                const azimuth = 180;
+                let calculatedTilt;
+                switch (optimizationTarget) {
+                    case 'summer':
+                        calculatedTilt = latitude - 15;
+                        break;
+                    case 'winter':
+                        calculatedTilt = latitude + 15;
+                        break;
+                    case 'yearly':
+                    default:
+                        calculatedTilt = latitude;
+                        break;
+                }
+                // Apply minimum 10-degree rule
+                const finalTilt = Math.max(10, calculatedTilt);
+
+                // 4. Update Visualization
+                // Using rotateX for a pseudo-3D tilt effect
+                solarPanelIcon.style.transform = `perspective(500px) rotateX(${finalTilt}deg)`;
+
+                // 5. Calculate Power Output
+                const totalSystemPowerWp = panelPower * panelCount;
+                const totalSystemPowerKWp = totalSystemPowerWp / 1000;
+                const performanceRatio = 0.80; // 80% efficiency factor
+
+                const dailyKwh = totalSystemPowerKWp * psh * performanceRatio;
+                const monthlyKwh = dailyKwh * 30;
+                const yearlyKwh = dailyKwh * 365;
+
+                // 6. Calculate Amp-hours
+                const dailyAh = (dailyKwh * 1000) / systemVoltage;
+
+                // 7. Update Output Display
+                totalPowerInput.value = totalSystemPowerKWp.toFixed(2);
+                outputAzimuth.textContent = `${azimuth}° Nam`;
+                outputTilt.textContent = `${finalTilt.toFixed(1)}°`;
+                outputDailyKwh.textContent = `${dailyKwh.toFixed(2)} kWh`;
+                outputMonthlyKwh.textContent = `${monthlyKwh.toFixed(2)} kWh`;
+                outputYearlyKwh.textContent = `${yearlyKwh.toFixed(2)} kWh`;
+                outputDailyAh.textContent = `${dailyAh.toFixed(2)} Ah`;
+            }
+
+            // Event Listeners
+            provinceSelect.addEventListener('change', updateCalculations);
+            panelPowerInput.addEventListener('input', updateCalculations);
+            panelCountInput.addEventListener('input', updateCalculations);
+            systemVoltageSelect.addEventListener('change', updateCalculations);
+            optimizationRadios.forEach(radio => radio.addEventListener('change', updateCalculations));
+
+            // Initial call
+            updateCalculations();
+        });
+    </script>
+</body>
+</html>
