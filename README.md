@@ -22,4 +22,4 @@ Dưới đây là danh sách các công cụ trực tuyến miễn phí mà tôi
 4. **[Game Đua Vịt] (https://phamducngocdotcom.github.io/phamducngoc.github.io/gameduavit.html)**
   * Tạo một game nhỏ giúp giáo viên có thể chọn thí sinh lên bảng một cách ngẫu nhiên
 
-Cảm ơn bạn đã ghé thăm!
+5. ** [ Bảng góc nghiêng tối ưu khi lắp đặt tấm pin năng lượng mặt trời tại Việt Nam](https://phamducngocdotcom.github.io/phamducngoc.github.io/goc-nghieng-tam-pin.html)**
