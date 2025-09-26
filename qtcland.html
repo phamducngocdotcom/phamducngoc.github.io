@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QTCLand.com - Báo cáo & Định giá Tài sản Số</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #EE9B00, #CA6702);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-gray-100" style="background-color: #F0F4F8;">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold" style="color: #005F73;">Báo Cáo Đầu Tư & Định Giá Tài Sản Số</h1>
+            <p class="text-2xl md:text-3xl font-bold mt-2 gradient-text">QTCLAND.COM</p>
+            <p class="mt-4 text-lg" style="color: #0A9396;">Cơ hội sở hữu thương hiệu bất động sản hàng đầu trên nền tảng số.</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 flex flex-col md:flex-row items-center justify-between text-center md:text-left" style="background-color: #005F73; color: white;">
+                <div class="md:w-2/3">
+                    <h2 class="text-2xl font-bold mb-2" style="color: #E9D8A6;">Định Giá Tài Sản Website</h2>
+                    <p class="text-lg">Dựa trên lưu lượng truy cập, uy tín thương hiệu, tiềm năng SEO và khả năng tạo khách hàng tiềm năng, qtcland.com được định giá ở mức:</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <p class="text-5xl md:text-6xl font-extrabold" style="color: #EE9B00;">1.2 Tỷ VNĐ</p>
+                    <p class="text-sm" style="color: #94D2BD;">(Giá trị ước tính tối thiểu)</p>
+                </div>
+            </div>
+            
+            <div class="md:col-span-2 lg:col-span-1 bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xl font-bold mb-4" style="color: #005F73;">Thương Hiệu & Vị Thế Thị Trường</h3>
+                    <p class="text-gray-600 mb-4">QTC Land không chỉ là một website, mà là một thương hiệu đã được khẳng định trong lĩnh vực phân phối bất động sản cao cấp, đặc biệt là các dự án của Vinhomes.</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-center p-4 rounded-lg" style="background-color: #E0F2F1;">
+                        <span class="text-3xl mr-4">🏆</span>
+                        <div>
+                            <p class="font-semibold" style="color: #0A9396;">Đại Lý Phân Phối Chiến Lược</p>
+                            <p class="text-sm text-gray-700">Đối tác Bạch Kim chính thức của Vinhomes.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg" style="background-color: #FFF8E1;">
+                        <span class="text-3xl mr-4">🥇</span>
+                        <div>
+                            <p class="font-semibold" style="color: #CA6702;">Top 1 Doanh Số 2023-2024</p>
+                            <p class="text-sm text-gray-700">Dẫn đầu phân phối tại Vinhomes Ocean Park 2 & 3.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-center mb-4" style="color: #005F73;">Tăng Trưởng Lưu Lượng Truy Cập Hàng Tháng</h3>
+                <p class="text-center text-gray-600 mb-4">Website ghi nhận sự tăng trưởng ổn định và bền vững, thu hút lượng lớn khách hàng tiềm năng chất lượng cao mỗi tháng.</p>
+                <div class="chart-container">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-center mb-4" style="color: #005F73;">Phân Bổ Nguồn Truy Cập</h3>
+                 <p class="text-center text-gray-600 mb-4">Nguồn truy cập đa dạng với tỷ lệ Organic Search chiếm ưu thế, chứng tỏ sức mạnh SEO vượt trội và bền vững.</p>
+                <div class="chart-container h-64 md:h-auto">
+                    <canvas id="sourceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-center mb-4" style="color: #005F73;">Hiệu Suất Từ Khóa SEO</h3>
+                <p class="text-center text-gray-600 mb-4">Hệ thống từ khóa chiến lược bao phủ các dự án trọng điểm, thống trị các vị trí top đầu trên Google, mang lại nguồn khách hàng miễn phí và ổn định.</p>
+                 <div class="chart-container">
+                    <canvas id="keywordChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="lg:col-span-3 bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-center mb-6" style="color: #005F73;">Phân Tích SWOT</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 rounded-lg border-l-4" style="border-color: #0A9396; background-color: #E0F2F1;">
+                        <h4 class="font-bold mb-2" style="color: #005F73;">Điểm Mạnh (Strengths)</h4>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li>Thương hiệu uy tín, đối tác Bạch kim Vinhomes.</li>
+                            <li>Tên miền đẹp, dễ nhớ, tuổi đời cao (từ 2018).</li>
+                            <li>Lượng truy cập organic lớn và ổn định.</li>
+                            <li>Hệ thống SEO top đầu cho các từ khóa giá trị cao.</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 rounded-lg border-l-4" style="border-color: #EE9B00; background-color: #FFF8E1;">
+                        <h4 class="font-bold mb-2" style="color: #CA6702;">Cơ Hội (Opportunities)</h4>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li>Mở rộng phân phối các dự án BĐS cao cấp khác.</li>
+                            <li>Phát triển kênh YouTube, TikTok dựa trên uy tín sẵn có.</li>
+                            <li>Xây dựng hệ thống Automation Marketing để chăm sóc lead.</li>
+                            <li>Thị trường BĐS phục hồi, nhu cầu tìm kiếm online tăng.</li>
+                        </ul>
+                    </div>
+                     <div class="p-4 rounded-lg border-l-4" style="border-color: #AE2012; background-color: #FFF1F0;">
+                        <h4 class="font-bold mb-2" style="color: #9B2226;">Điểm Yếu (Weaknesses)</h4>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li>Nội dung tập trung chủ yếu vào dự án Vinhomes.</li>
+                            <li>Chưa khai thác tối đa các nền tảng mạng xã hội.</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 rounded-lg border-l-4" style="border-color: #6c757d; background-color: #F8F9FA;">
+                        <h4 class="font-bold mb-2" style="color: #495057;">Thách Thức (Threats)</h4>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li>Sự cạnh tranh từ các đại lý và website mới.</li>
+                            <li>Thay đổi thuật toán của Google có thể ảnh hưởng SEO.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 bg-white rounded-xl shadow-lg p-8 text-center">
+                <h3 class="text-2xl font-bold mb-4" style="color: #005F73;">Hồ Sơ Nhà Đầu Tư Phù Hợp</h3>
+                <p class="max-w-3xl mx-auto text-gray-600 mb-6">Tài sản số này là một cơ hội đầu tư chiến lược, đặc biệt phù hợp cho các cá nhân và tổ chức muốn đi tắt đón đầu trong thị trường bất động sản.</p>
+                <div class="flex flex-wrap justify-center gap-4 text-left">
+                    <div class="p-4 rounded-lg" style="background-color: #E0F2F1; color: #005F73;">✓ Các công ty BĐS muốn có ngay vị thế online.</div>
+                    <div class="p-4 rounded-lg" style="background-color: #E0F2F1; color: #005F73;">✓ Các đội nhóm kinh doanh muốn tự chủ nguồn khách.</div>
+                    <div class="p-4 rounded-lg" style="background-color: #E0F2F1; color: #005F73;">✓ Nhà đầu tư tìm kiếm tài sản số có dòng tiền.</div>
+                    <div class="p-4 rounded-lg" style="background-color: #E0F2F1; color: #005F73;">✓ Cá nhân muốn xây dựng thương hiệu chuyên gia BĐS.</div>
+                </div>
+                 <div class="mt-8">
+                    <a href="mailto:investment@qtcland.com?subject=Quan tâm đầu tư website QTCLand.com" class="inline-block text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105" style="background: linear-gradient(90deg, #EE9B00, #CA6702);">LIÊN HỆ ĐẦU TƯ</a>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="text-center mt-12 text-sm text-gray-500">
+            <p>Báo cáo được tạo vào ngày 26 tháng 9 năm 2025. Dữ liệu mang tính chất tham khảo tại thời điểm báo cáo.</p>
+        </footer>
+    </div>
+
+    <script>
+        const brilliantBluesPalette = {
+            darkBlue: '#005F73',
+            teal: '#0A9396',
+            lightTeal: '#94D2BD',
+            beige: '#E9D8A6',
+            orange: '#EE9B00',
+            darkOrange: '#CA6702',
+            rust: '#BB3E03',
+            red: '#AE2012',
+            darkRed: '#9B2226'
+        };
+
+        const defaultTooltipOptions = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            } else {
+                              return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        function processLabels(labels) {
+            const maxLength = 16;
+            return labels.map(label => {
+                if (label.length <= maxLength) {
+                    return label;
+                }
+                const words = label.split(' ');
+                const newLabel = [];
+                let currentLine = '';
+                words.forEach(word => {
+                    if ((currentLine + ' ' + word).trim().length > maxLength) {
+                        newLabel.push(currentLine.trim());
+                        currentLine = word;
+                    } else {
+                        currentLine = (currentLine + ' ' + word).trim();
+                    }
+                });
+                if (currentLine) {
+                    newLabel.push(currentLine.trim());
+                }
+                return newLabel;
+            });
+        }
+        
+        function initTrafficChart() {
+            const ctx = document.getElementById('trafficChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Quý 4 2024', 'Quý 1 2025', 'Quý 2 2025', 'Quý 3 2025'],
+                    datasets: [{
+                        label: 'Lượt truy cập',
+                        data: [21000, 25000, 31000, 35000],
+                        borderColor: brilliantBluesPalette.teal,
+                        backgroundColor: 'rgba(10, 147, 150, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    ...defaultTooltipOptions,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('vi-VN');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initSourceChart() {
+            const ctx = document.getElementById('sourceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Organic Search', 'Direct', 'Social', 'Referral'],
+                    datasets: [{
+                        label: 'Nguồn truy cập',
+                        data: [65, 20, 10, 5],
+                        backgroundColor: [
+                            brilliantBluesPalette.teal,
+                            brilliantBluesPalette.lightTeal,
+                            brilliantBluesPalette.orange,
+                            brilliantBluesPalette.beige
+                        ],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    ...defaultTooltipOptions,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        ...defaultTooltipOptions.plugins,
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
+
+        function initKeywordChart() {
+            const ctx = document.getElementById('keywordChart').getContext('2d');
+            const originalLabels = [
+                'giá biệt thự Vinhomes Ocean Park 3', 
+                'chính sách bán hàng The Crown', 
+                'mua shophouse Grand World Hà Nội', 
+                'tiến độ Vinhomes Royal Island', 
+                'bảng giá The Empire 2025'
+            ];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: processLabels(originalLabels),
+                    datasets: [{
+                        label: 'Thứ hạng trung bình',
+                        data: [1, 2, 1, 3, 2],
+                        backgroundColor: brilliantBluesPalette.darkBlue,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    ...defaultTooltipOptions,
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            reverse: true,
+                            beginAtZero: true,
+                             ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        ...defaultTooltipOptions.plugins,
+                        legend: {
+                           display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTrafficChart();
+            initSourceChart();
+            initKeywordChart();
+        });
+    </script>
+</body>
+</html>
