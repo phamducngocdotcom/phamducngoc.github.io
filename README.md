@@ -1,4 +1,4 @@
-# Phạm Đức Ngọc - Founder & Developer
+# Phạm Đức Ngọc - Đèn Năng Lượng mặt trời và Nhà Thông Minh Hải Phòng
 
 Chào mừng bạn đến với trang giới thiệu của **Phạm Đức Ngọc**, người sáng lập website **[phamducngoc.com](https://phamducngoc.com)** và trang dự án **[phamducngoc.github.io](https://phamducngocdotcom.github.io/phamducngoc.github.io/)**.
 
