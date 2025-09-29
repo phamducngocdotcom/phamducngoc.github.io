@@ -3,13 +3,14 @@
 Chào mừng bạn đến với trang giới thiệu của **Phạm Đức Ngọc**, người sáng lập website **[phamducngoc.com](https://phamducngoc.com)** và trang dự án **[phamducngoc.github.io](https://phamducngocdotcom.github.io/phamducngoc.github.io/)**.
 
 Tôi đam mê phát triển các công cụ hữu ích và chia sẻ kiến thức về công nghệ, đặc biệt là trong lĩnh vực năng lượng mặt trời.
+Địa Chỉ **[Đèn Năng Lượng mặt trời và Nhà Thông Minh Hải Phòng](https://share.google/XApfecMQ58Fz6H1fj)** 55b Đông Trung Hành, Đằng Lâm, Hải An, Hải Phòng
 
 ---
 
 ## 🔧 Các Công Cụ Miễn Phí
 
 Dưới đây là danh sách các công cụ trực tuyến miễn phí mà tôi đã phát triển để phục vụ cộng đồng:
-Địa chỉ **[Đèn Năng Lượng mặt trời và Nhà Thông Minh Hải Phòng](https://share.google/XApfecMQ58Fz6H1fj)**
+
 1.  **[Chuyển đổi từ W sang Wh (Watt sang Watt-giờ)](https://phamducngocdotcom.github.io/phamducngoc.github.io/w-to-wh.html)**
     * Một công cụ đơn giản giúp bạn nhanh chóng tính toán lượng điện năng tiêu thụ từ công suất của thiết bị.
 
