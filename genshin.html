@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trình xem mã Hoyo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: Ứng dụng được cấu trúc như một bảng điều khiển một trang với điều hướng theo tab. Người dùng có thể chọn một trò chơi (Genshin, HSR, v.v.) từ các tab ở trên cùng. Vùng nội dung chính sau đó sẽ tìm nạp và hiển thị động các mã đổi thưởng đang hoạt động cho trò chơi đã chọn trong một bố cục thẻ rõ ràng. Cấu trúc này được chọn để mang lại hiệu quả và tốc độ, cho phép người dùng nhanh chóng tìm và sao chép mã mà không cần tải lại trang hoặc điều hướng phức tạp. -->
+    <!-- Visualization & Content Choices: Dữ liệu API (mã đổi thưởng) được trình bày dưới dạng danh sách các thẻ. Mỗi thẻ chứa mã, mô tả, ngày phát hành và một nút 'Sao chép'. Lựa chọn này trực tiếp phục vụ mục tiêu của người dùng: xác định và sao chép mã. Tương tác chính là nút 'Sao chép', giúp đơn giản hóa quy trình cho người dùng. Không cần trực quan hóa dữ liệu phức tạp (biểu đồ), vì dữ liệu là văn bản và mục tiêu là tiện ích. Điều này được thực hiện bằng cách sử dụng các phần tử HTML được tạo động với Vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .game-button.active {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .copy-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .copy-button:active {
+            transform: scale(0.95);
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Hoyo Codes</h1>
+            <p class="text-gray-600 mt-2">Tất cả các mã đổi quà mới nhất cho các trò chơi Hoyoverse yêu thích của bạn.</p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8" id="game-selector">
+            <button data-game="genshin" class="game-button px-4 py-2 rounded-lg font-semibold bg-white text-gray-700 shadow-sm hover:bg-gray-100 transition">Genshin Impact</button>
+            <button data-game="hsr" class="game-button px-4 py-2 rounded-lg font-semibold bg-white text-gray-700 shadow-sm hover:bg-gray-100 transition">Honkai: Star Rail</button>
+            <button data-game="hi3" class="game-button px-4 py-2 rounded-lg font-semibold bg-white text-gray-700 shadow-sm hover:bg-gray-100 transition">Honkai Impact 3rd</button>
+            <button data-game="zenless" class="game-button px-4 py-2 rounded-lg font-semibold bg-white text-gray-700 shadow-sm hover:bg-gray-100 transition">Zenless Zone Zero</button>
+        </nav>
+
+        <main id="content">
+            <div id="loader" class="text-center hidden">
+                <div class="flex justify-center items-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="ml-3 text-gray-600">Đang tải mã...</p>
+                </div>
+            </div>
+            <div id="error" class="text-center text-red-600 bg-red-100 p-4 rounded-lg hidden"></div>
+            <div id="codes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>Được cung cấp bởi API hoyo-codes. Dữ liệu được cập nhật tự động.</p>
+        </footer>
+    </div>
+    
+    <div id="copy-notification" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300">
+        Đã sao chép!
+    </div>
+
+    <script>
+        const gameSelector = document.getElementById('game-selector');
+        const loader = document.getElementById('loader');
+        const errorContainer = document.getElementById('error');
+        const codesContainer = document.getElementById('codes-container');
+        const copyNotification = document.getElementById('copy-notification');
+        const API_BASE_URL = 'https://hoyo-codes.seriaati.workers.dev/';
+
+        let activeGame = 'genshin';
+
+        const fetchCodes = async (game) => {
+            loader.classList.remove('hidden');
+            errorContainer.classList.add('hidden');
+            codesContainer.innerHTML = '';
+            
+            // --- THAY ĐỔI ---
+            // Chuyển sang một proxy khác để có độ tin cậy tốt hơn.
+            const PROXY_URL = 'https://cors.sh/';
+            const fullApiUrl = `${API_BASE_URL}${game}`;
+
+            try {
+                // Proxy mới yêu cầu URL API được nối trực tiếp.
+                const response = await fetch(`${PROXY_URL}${fullApiUrl}`);
+                if (!response.ok) {
+                    throw new Error(`Không thể tìm nạp dữ liệu. Mã trạng thái: ${response.status}`);
+                }
+                const data = await response.json();
+                const activeCodes = data.filter(code => !code.is_expired);
+                displayCodes(activeCodes);
+            } catch (err) {
+                displayError(err.message);
+            } finally {
+                loader.classList.add('hidden');
+            }
+        };
+
+        const displayCodes = (codes) => {
+            if (codes.length === 0) {
+                codesContainer.innerHTML = `<p class="text-gray-500 col-span-full text-center">Không tìm thấy mã nào đang hoạt động cho trò chơi này.</p>`;
+                return;
+            }
+
+            codes.forEach(code => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-5 rounded-xl shadow-md border border-gray-100 fade-in';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-blue-600">${code.code}</h3>
+                         <button class="copy-button bg-blue-500 text-white px-3 py-1 rounded-md text-sm font-semibold hover:bg-blue-600 active:bg-blue-700" data-code="${code.code}">Sao chép</button>
+                    </div>
+                    <p class="text-gray-700 my-2">${code.description}</p>
+                    <p class="text-gray-500 text-xs">Đã thêm: ${new Date(code.date).toLocaleDateString('vi-VN')}</p>
+                    ${code.expired_date ? `<p class="text-red-500 text-xs mt-1">Hết hạn: ${new Date(code.expired_date).toLocaleDateString('vi-VN')}</p>` : ''}
+                `;
+                codesContainer.appendChild(card);
+            });
+        };
+
+        const displayError = (message) => {
+            errorContainer.textContent = `Đã xảy ra lỗi: ${message}`;
+            errorContainer.classList.remove('hidden');
+        };
+
+        const updateActiveButton = (game) => {
+            document.querySelectorAll('.game-button').forEach(button => {
+                button.classList.remove('active');
+                if (button.dataset.game === game) {
+                    button.classList.add('active');
+                }
+            });
+        };
+        
+        gameSelector.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const game = e.target.dataset.game;
+                if (game !== activeGame) {
+                    activeGame = game;
+                    fetchCodes(game);
+                    updateActiveButton(game);
+                }
+            }
+        });
+
+        codesContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('copy-button')) {
+                const codeToCopy = e.target.dataset.code;
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = codeToCopy;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+
+                copyNotification.classList.remove('opacity-0');
+                setTimeout(() => {
+                    copyNotification.classList.add('opacity-0');
+                }, 2000);
+            }
+        });
+
+        window.addEventListener('load', () => {
+            fetchCodes(activeGame);
+            updateActiveButton(activeGame);
+        });
+    </script>
+</body>
+</html>
+
+

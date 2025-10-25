@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ chuyển đổi Ampe-giờ (Ah) sang Kilowatt-giờ (kWh)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals - Slate, Stone, and Sky Blue -->
+    <!-- Application Structure Plan: Cấu trúc ứng dụng được thiết kế ưu tiên tiện ích, đặt công cụ tính toán ở vị trí trung tâm, dễ thấy nhất. Ngay bên dưới là phần giải thích kết quả động, giúp người dùng hiểu rõ các bước tính toán. Các mục thông tin bổ sung và biểu đồ trực quan được sắp xếp hợp lý phía dưới để cung cấp bối cảnh và kiến thức nền, phục vụ những người dùng muốn tìm hiểu sâu hơn. Cách tiếp cận này đảm bảo người dùng có thể thực hiện tác vụ chính ngay lập tức, đồng thời dễ dàng khám phá nội dung liên quan. -->
+    <!-- Visualization & Content Choices: Report Info: Chuyển đổi Ah sang kWh. Goal: Cung cấp công cụ tính toán và giải thích. Viz/Presentation: Sử dụng biểu mẫu HTML tương tác cho việc nhập liệu, văn bản động để giải thích các bước tính toán, và biểu đồ cột từ Chart.js để minh họa mối quan hệ giữa Ah và kWh ở các mức điện áp khác nhau. Interaction: Người dùng nhập số liệu, nhấp vào nút để xem kết quả được cập nhật tức thì trên cả vùng hiển thị và phần giải thích. Justification: Sự kết hợp này mang lại trải nghiệm toàn diện, vừa là một công cụ nhanh chóng, vừa là một tài nguyên học tập hiệu quả, giúp người dùng hiểu được bản chất của phép tính. Library/Method: HTML, Tailwind CSS, Vanilla JS, Chart.js (Canvas). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .calculator-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        .calculator-card:hover {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .btn {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .result-display {
+            background-color: #f1f5f9; /* slate-100 */
+            border-left: 4px solid #3b82f6; /* blue-500 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Công cụ chuyển đổi Ah sang kWh</h1>
+            <p class="mt-2 text-lg text-slate-600">Tính toán năng lượng điện một cách nhanh chóng và chính xác.</p>
+        </header>
+
+        <main>
+            <section id="calculator" class="mb-10">
+                <div class="calculator-card p-6 md:p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div>
+                            <label for="ampHours" class="block text-md font-medium text-slate-700 mb-2">Ampe-giờ (Ah)</label>
+                            <input type="number" id="ampHours" placeholder="Ví dụ: 100" class="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label for="volts" class="block text-md font-medium text-slate-700 mb-2">Điện áp (V)</label>
+                            <input type="number" id="volts" placeholder="Ví dụ: 12" class="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                        </div>
+                    </div>
+                    <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                        <button id="calculateBtn" class="btn w-full sm:w-auto flex-1 bg-blue-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-blue-700 shadow">Tính toán</button>
+                        <button id="resetBtn" class="btn w-full sm:w-auto flex-1 bg-slate-200 text-slate-800 font-semibold py-3 px-6 rounded-md hover:bg-slate-300">Xóa</button>
+                    </div>
+                    <div id="result" class="mt-6 p-4 result-display rounded-md hidden">
+                        <p class="text-lg font-medium">Kết quả:</p>
+                        <p class="text-3xl font-bold text-blue-600"><span id="kwhResult"></span> kWh</p>
+                    </div>
+                    <div id="error" class="mt-4 text-red-600 font-medium hidden"></div>
+                </div>
+            </section>
+
+            <section id="explanation" class="mb-10 p-6 bg-white rounded-lg shadow-sm hidden">
+                <h2 class="text-2xl font-bold mb-4 text-slate-900">Diễn giải phép tính</h2>
+                <div id="calculationSteps" class="space-y-2 text-slate-700 text-lg">
+                </div>
+            </section>
+
+            <section id="info" class="space-y-8">
+                <div class="p-6 bg-white rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900">Công thức chuyển đổi Ah sang kWh</h2>
+                    <p class="text-slate-700 mb-4">Để chuyển đổi từ Ampe-giờ (Ah) sang Kilowatt-giờ (kWh), chúng ta cần biết thêm giá trị điện áp (Volt). Công thức tính toán năng lượng (tính bằng Watt-giờ) là:</p>
+                    <div class="p-4 bg-slate-100 rounded-md text-center text-lg font-mono text-slate-800">
+                        Năng lượng (Wh) = Ampe-giờ (Ah) × Điện áp (V)
+                    </div>
+                    <p class="text-slate-700 mt-4">Vì 1 Kilowatt (kW) bằng 1000 Watt (W), để đổi từ Watt-giờ (Wh) sang Kilowatt-giờ (kWh), chúng ta chỉ cần chia kết quả cho 1000:</p>
+                    <div class="p-4 bg-blue-100 border-l-4 border-blue-500 rounded-md text-center text-xl font-bold text-blue-800 mt-2">
+                        kWh = (Ah × V) / 1000
+                    </div>
+                </div>
+
+                <div class="p-6 bg-white rounded-lg shadow-sm">
+                     <h2 class="text-2xl font-bold mb-4 text-slate-900">Ví dụ thực tế</h2>
+                     <p class="text-slate-700">Giả sử bạn có một ắc quy 12V với dung lượng 100 Ah. Để tính năng lượng lưu trữ bằng kWh, bạn áp dụng công thức:</p>
+                     <ul class="list-disc list-inside mt-4 space-y-2 text-slate-700">
+                        <li><b>Bước 1:</b> Tính năng lượng bằng Watt-giờ (Wh).<br><span class="ml-4 font-mono">Wh = 100 Ah × 12 V = 1200 Wh</span></li>
+                        <li><b>Bước 2:</b> Chuyển đổi Wh sang kWh.<br><span class="ml-4 font-mono">kWh = 1200 Wh / 1000 = 1.2 kWh</span></li>
+                     </ul>
+                     <p class="text-slate-700 mt-4">Như vậy, ắc quy của bạn có thể lưu trữ 1.2 kWh điện năng.</p>
+                </div>
+
+                <div class="p-6 bg-white rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4 text-slate-900">Trực quan hóa: Ah và kWh</h2>
+                    <p class="text-slate-700 mb-6">Biểu đồ dưới đây minh họa lượng năng lượng (kWh) tương ứng với các dung lượng (Ah) khác nhau ở một số mức điện áp phổ biến. Điều này giúp bạn dễ dàng hình dung mối quan hệ giữa các đơn vị.</p>
+                    <div class="chart-container">
+                        <canvas id="ahKwhChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-12 py-4 border-t border-slate-200">
+            <div class="flex flex-col items-center gap-4">
+                <a href="https://phamducngoc.com/" target="_blank" rel="noopener noreferrer">
+                    <img src="https://phamducngoc.com/wp-content/uploads/2025/08/pham-duc-ngoc.png" alt="Logo Pham Duc Ngoc" class="h-16 w-auto">
+                </a>
+                <p class="text-slate-500">Một công cụ hữu ích cho mọi nhu cầu về năng lượng.</p>
+                <a href="https://phamducngoc.com/cong-cu-tinh-tu-dong-ah-sang-kwh/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 hover:underline">
+                    Tìm hiểu thêm về chuyển đổi Ampe giờ sang Kilowatt giờ (Ah sang kWh)
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const ampHoursInput = document.getElementById('ampHours');
+        const voltsInput = document.getElementById('volts');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultDiv = document.getElementById('result');
+        const kwhResultSpan = document.getElementById('kwhResult');
+        const errorDiv = document.getElementById('error');
+        const explanationSection = document.getElementById('explanation');
+        const calculationStepsDiv = document.getElementById('calculationSteps');
+
+        function calculate() {
+            const ah = parseFloat(ampHoursInput.value);
+            const v = parseFloat(voltsInput.value);
+
+            errorDiv.classList.add('hidden');
+            errorDiv.textContent = '';
+
+            if (isNaN(ah) || isNaN(v) || ah <= 0 || v <= 0) {
+                errorDiv.textContent = 'Vui lòng nhập giá trị Ampe-giờ và Điện áp hợp lệ (lớn hơn 0).';
+                errorDiv.classList.remove('hidden');
+                resultDiv.classList.add('hidden');
+                explanationSection.classList.add('hidden');
+                return;
+            }
+
+            const kwh = (ah * v) / 1000;
+            kwhResultSpan.textContent = kwh.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+            resultDiv.classList.remove('hidden');
+
+            updateExplanation(ah, v, kwh);
+            explanationSection.classList.remove('hidden');
+        }
+
+        function updateExplanation(ah, v, kwh) {
+             calculationStepsDiv.innerHTML = `
+                <p>1. <strong>Tính Watt-giờ (Wh):</strong> Lấy Ampe-giờ nhân với Điện áp.</p>
+                <p class="pl-4 font-mono text-slate-800 bg-slate-100 p-2 rounded">${ah.toLocaleString('vi-VN')} Ah × ${v.toLocaleString('vi-VN')} V = ${(ah * v).toLocaleString('vi-VN')} Wh</p>
+                <p>2. <strong>Chuyển đổi sang Kilowatt-giờ (kWh):</strong> Lấy kết quả Watt-giờ chia cho 1000.</p>
+                <p class="pl-4 font-mono text-slate-800 bg-slate-100 p-2 rounded">${(ah * v).toLocaleString('vi-VN')} Wh / 1000 = ${kwh.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 3 })} kWh</p>
+            `;
+        }
+
+        function reset() {
+            ampHoursInput.value = '';
+            voltsInput.value = '';
+            resultDiv.classList.add('hidden');
+            explanationSection.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            ampHoursInput.focus();
+        }
+
+        calculateBtn.addEventListener('click', calculate);
+        resetBtn.addEventListener('click', reset);
+        
+        ampHoursInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                voltsInput.focus();
+            }
+        });
+
+        voltsInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                calculate();
+            }
+        });
+
+
+        const ctx = document.getElementById('ahKwhChart').getContext('2d');
+        const ahKwhChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['50 Ah', '100 Ah', '150 Ah', '200 Ah', '250 Ah'],
+                datasets: [{
+                    label: '12V (kWh)',
+                    data: [0.6, 1.2, 1.8, 2.4, 3.0],
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }, {
+                    label: '24V (kWh)',
+                    data: [1.2, 2.4, 3.6, 4.8, 6.0],
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: '48V (kWh)',
+                    data: [2.4, 4.8, 7.2, 9.6, 12.0],
+                    backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Năng lượng (kWh) theo dung lượng (Ah) và điện áp (V)',
+                        font: {
+                            size: 16,
+                            family: 'Inter'
+                        },
+                        color: '#1e293b'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toLocaleString('vi-VN') + ' kWh';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Kilowatt-giờ (kWh)',
+                            font: {
+                                size: 14,
+                                family: 'Inter'
+                            },
+                             color: '#475569'
+                        }
+                    },
+                    x: {
+                         title: {
+                            display: true,
+                            text: 'Dung lượng Ắc quy',
+                            font: {
+                                size: 14,
+                                family: 'Inter'
+                            },
+                             color: '#475569'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
