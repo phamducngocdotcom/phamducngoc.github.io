@@ -1,16 +1,16 @@
 # Configurations
-title:            Jekyll Gitbook
-longtitle:        Jekyll Gitbook
-author:           HE Tao
-email:            sighingnow@gmail.com
+title:            Đèn Năng Lượng mặt trời và Nhà Thông Minh Hải Phòng | Phạm Đức Ngọc 
+longtitle:        Phạm Đức Ngọc là tác giả của https://phamducngoc.com - Website  về đèn năng lượng mặt trời, điện năng lượng mặt trời và Thiết bị nhà thông minh
+author:           Phạm Đức Ngọc
+email:            dammeso@gmail.com
 description: >
-  Build Jekyll site with the GitBook style.
+  Nơi lưu trữ nội dung dành cho các công cụ AI, được đồng bộ từ phamducngoc.com..
 
 version:          1.0
 gitbook_version:  3.2.3
 
-url:              'https://sighingnow.github.io'
-baseurl:          '/jekyll-gitbook'
+url:              'https://ai.phamducngoc.com'
+baseurl:          ''
 rss:              RSS
 
 # bootstrap: use the remote theme for the site itself
