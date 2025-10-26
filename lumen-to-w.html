@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ tính Công suất Đèn Năng lượng Mặt trời</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Sử dụng font Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Thêm font Inter từ Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-xl p-8 bg-white rounded-2xl shadow-lg">
+        
+        <!-- === BẮT ĐẦU PHẦN BỔ SUNG === -->
+        <div class="flex flex-col items-center mb-6 space-y-4">
+            <!-- Logo -->
+            <a href="https://phamducngoc.com" target="_blank" rel="noopener noreferrer" class="block">
+                <img 
+                    src="https://phamducngoc.com/wp-content/uploads/2025/08/pham-duc-ngoc.png" 
+                    alt="Logo Phạm Đức Ngọc" 
+                    class="h-20 w-auto object-contain"
+                    onerror="this.onerror=null; this.src='https://placehold.co/200x80/eee/333?text=Pham+Duc+Ngoc&font=inter';"
+                >
+            </a>
+            
+            <!-- Link xem thêm -->
+            <a 
+                href="https://phamducngoc.com/cong-cu-tinh-cong-suat-thuc-den-nang-luong-mat-troi/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="text-base text-blue-600 hover:underline hover:text-blue-800 transition"
+            >
+                Xem thêm: Tính Lumen sang W &rarr;
+            </a>
+        </div>
+        <!-- === KẾT THÚC PHẦN BỔ SUNG === -->
+
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">
+            Tính Công suất thực (Watts) của Đèn NĂNG LƯỢNG MẶT TRỜI từ Lumens
+        </h1>
+        
+        <!-- Phần giải thích dựa trên nội dung bạn cung cấp -->
+        <div class="text-gray-700 space-y-4 mb-8">
+            
+                <li class="mb-2 ml-4 list-disc">
+                    <strong class="font-semibold">Watts (W):</strong> Đo lường năng lượng tiêu thụ.
+                </li>
+                <li class="ml-4 list-disc">
+                    <strong class="font-semibold">Lumens (lm):</strong> Đo lường lượng ánh sáng nhìn thấy được (độ sáng).
+                </li>
+            </ul>
+            <p>
+                <strong class="font-semibold">Hiệu suất phát sáng (Lumens/Watt)</strong> cho biết bóng đèn chuyển đổi năng lượng thành ánh sáng hiệu quả như thế nào. Đèn LED năng lượng mặt trời hiệu suất cao thường có hiệu suất trong khoảng <strong class="font-semibold text-blue-600">75 đến 110 lumens mỗi watt</strong>.
+            </p>
+            <p>Công cụ này sẽ giúp bạn ước tính công suất thực (số Watts) mà đèn LED tiêu thụ dựa trên tổng số Lumens mà nó phát ra.</p>
+        </div>
+
+        <!-- Công cụ tính toán -->
+        <div class="space-y-4">
+            <div>
+                <label for="lumensInput" class="block text-lg font-medium text-gray-700 mb-2">
+                    Nhập tổng số Lumens (lm) của đèn:
+                </label>
+                <input 
+                    type="number" 
+                    id="lumensInput"
+                    placeholder="Ví dụ: 800"
+                    class="w-full p-4 text-lg border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                >
+            </div>
+            
+            <!-- Đây là nút tính toán -->
+            <button 
+                id="calculateButton"
+                class="w-full py-4 px-6 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out"
+            >
+                Tính toán Công suất thực
+            </button>
+            <!-- Nút tính toán kết thúc ở đây -->
+        </div>
+
+        <!-- Khu vực hiển thị kết quả -->
+        <div id="resultContainer" class="mt-8 hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-3">
+                Công suất thực ước tính của đèn LED:
+            </h2>
+            <div id="resultOutput" class="p-5 bg-blue-50 border-l-4 border-blue-500 rounded-lg text-blue-800 text-lg font-medium">
+                <!-- Kết quả sẽ được chèn vào đây -->
+            </div>
+        </div>
+
+        <!-- Thông báo lỗi -->
+        <div id="errorContainer" class="mt-6 hidden">
+            <p id="errorMessage" class="p-4 bg-red-50 border border-red-300 text-red-700 rounded-lg">
+                <!-- Thông báo lỗi sẽ được chèn vào đây -->
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        // Lấy các phần tử DOM
+        const lumensInput = document.getElementById('lumensInput');
+        const calculateButton = document.getElementById('calculateButton');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultOutput = document.getElementById('resultOutput');
+        const errorContainer = document.getElementById('errorContainer');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Thêm sự kiện click cho nút
+        calculateButton.addEventListener('click', () => {
+            // Lấy giá trị lumens và chuyển sang số
+            const lumens = parseFloat(lumensInput.value);
+
+            // Ẩn kết quả và lỗi cũ
+            resultContainer.classList.add('hidden');
+            errorContainer.classList.add('hidden');
+
+            // Kiểm tra giá trị đầu vào
+            if (isNaN(lumens) || lumens <= 0) {
+                errorMessage.textContent = 'Vui lòng nhập một số Lumens hợp lệ (lớn hơn 0).';
+                errorContainer.classList.remove('hidden');
+            } else {
+                // Tính toán dựa trên hiệu suất 75-110 lm/W
+                const minEfficacy = 110; // Hiệu suất cao nhất -> Watts thấp nhất
+                const maxEfficacy = 75;  // Hiệu suất thấp nhất -> Watts cao nhất
+
+                const minWatts = lumens / minEfficacy;
+                const maxWatts = lumens / maxEfficacy;
+
+                // Hiển thị kết quả
+                resultOutput.innerHTML = `
+                    Công suất thực của đèn là khoảng <br>
+                    <strong class="text-2xl">${minWatts.toFixed(2)} W</strong> (với hiệu suất 110 lm/W) 
+                    đến 
+                    <strong class="text-2xl">${maxWatts.toFixed(2)} W</strong> (với hiệu suất 75 lm/W).
+                `;
+                resultContainer.classList.remove('hidden');
+            }
+        });
+
+        // Cũng cho phép tính toán khi nhấn Enter trong ô input
+        lumensInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                calculateButton.click();
+            }
+        });
+    </script>
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trực Quan Hóa & Tính Toán Pin Năng Lượng Mặt Trời</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff; /* sky-blue-50 */
+        }
+        
+        /* NEW: Sunburst effect for the logo */
+        .sunburst-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sunburst {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: repeating-conic-gradient(from 0deg, rgba(250, 204, 21, 0.4) 0deg 15deg, transparent 15deg 30deg);
+            animation: spin 45s linear infinite;
+            z-index: 1;
+        }
+
+        .sunburst-glow {
+             position: absolute;
+             width: 80%;
+             height: 80%;
+             border-radius: 50%;
+             background: radial-gradient(circle, rgba(251, 191, 36, 0.5) 0%, rgba(251, 191, 36, 0) 70%);
+             animation: pulse 4s ease-in-out infinite;
+             z-index: 0;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-5xl bg-white rounded-2xl shadow-xl p-6 md:p-8 space-y-6">
+        
+        <!-- Header -->
+        <header class="text-center">
+            <a href="https://phamducngoc.com" target="_blank" rel="noopener noreferrer" class="inline-block mb-4 transition-transform duration-300 hover:scale-105">
+                <img src="https://phamducngoc.com/wp-content/uploads/2025/08/pham-duc-ngoc.png" alt="Logo Pham Duc Ngoc" class="h-16 mx-auto" onerror="this.src='https://placehold.co/200x64/0ea5e9/ffffff?text=Logo'">
+            </a>
+            <h1 class="text-3xl md:text-4xl font-bold text-sky-600">Công Cụ Tối Ưu Hóa Hướng & Góc Nghiêng Pin Mặt Trời</h1>
+            <p class="text-slate-500 mt-2">Dữ liệu chi tiết cho 63 tỉnh thành Việt Nam.</p>
+        </header>
+
+        <!-- Main Content: Controls + Visualization -->
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            
+            <!-- Left Panel: Controls + Data Output -->
+            <div class="space-y-6">
+                <!-- Controls -->
+                <div class="p-6 bg-sky-50 rounded-lg border border-sky-200">
+                    <h2 class="text-xl font-semibold text-sky-800 mb-4">Bảng Điều Khiển</h2>
+                    <div>
+                        <label for="city-selector" class="block mb-2 text-sm font-medium text-slate-700">1. Chọn Tỉnh/Thành phố</label>
+                        <select id="city-selector" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+                    <div class="mt-4">
+                        <label for="wattage-selector" class="block mb-2 text-sm font-medium text-slate-700">2. Chọn Công Suất Pin (Wp)</label>
+                        <select id="wattage-selector" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5">
+                            <option value="100">100 Wp</option>
+                            <option value="250">250 Wp</option>
+                            <option value="450" selected>450 Wp</option>
+                            <option value="500">500 Wp</option>
+                            <option value="550">550 Wp</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tilt Angle Panel -->
+                <div id="tilt-panel" class="p-6 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-3">Góc Nghiêng Lắp Đặt Tối Ưu</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-700">Quanh năm:</span>
+                            <span id="tilt-year-round" class="font-bold text-blue-600 text-base bg-blue-100 px-2 py-0.5 rounded">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                             <span class="text-slate-700">Mùa hè (Tháng 3 - 8):</span>
+                            <span id="tilt-summer" class="font-bold text-blue-600 text-base bg-blue-100 px-2 py-0.5 rounded">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                             <span class="text-slate-700">Mùa đông (Tháng 9 - 2):</span>
+                            <span id="tilt-winter" class="font-bold text-blue-600 text-base bg-blue-100 px-2 py-0.5 rounded">--</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-4">*Góc nghiêng so với phương ngang. Hướng lắp đặt tối ưu luôn là hướng Nam.</p>
+                </div>
+
+                <!-- Output Panel -->
+                <div id="output-panel" class="p-6 bg-green-50 rounded-lg border border-green-200">
+                     <h3 class="text-lg font-semibold text-green-800 mb-3">Sản Lượng Điện Ước Tính (1 Tấm Pin)</h3>
+                     <div class="space-y-2 text-sm">
+                        <div class="flex justify-between items-center">
+                             <span class="text-slate-700">Hàng ngày:</span>
+                             <span id="daily-output" class="font-bold text-green-600 text-base">-- kWh</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-700">Hàng tháng:</span>
+                            <span id="monthly-output" class="font-bold text-green-600 text-base">-- kWh</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                             <span class="text-slate-700">Hàng năm:</span>
+                             <span id="yearly-output" class="font-bold text-green-600 text-base">-- kWh</span>
+                        </div>
+                     </div>
+                     <p class="text-xs text-slate-400 mt-4">*Kết quả chỉ là ước tính dựa trên số giờ nắng đỉnh và hiệu suất hệ thống trung bình 75%.</p>
+                </div>
+            </div>
+
+            <!-- Right Panel: Visualization -->
+            <div class="flex flex-col items-center justify-center space-y-4 lg:sticky lg:top-8 h-full min-h-[350px]">
+                
+                <!-- NEW: Logo with Sunburst Effect -->
+                <div class="sunburst-container w-64 h-64 md:w-80 md:h-80">
+                    <div class="sunburst"></div>
+                    <div class="sunburst-glow"></div>
+                    <a href="https://phamducngoc.com" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110 relative z-10">
+                         <img src="https://phamducngoc.com/wp-content/uploads/2025/08/pham-duc-ngoc.png" alt="Logo Pham Duc Ngoc" class="rounded-full h-32 w-32 md:h-40 md:w-40 object-cover border-4 border-white shadow-lg">
+                    </a>
+                </div>
+
+                <!-- Info Box -->
+                 <div class="text-center bg-slate-50 px-4 py-3 rounded-xl shadow-sm w-full max-w-xs">
+                    <p class="text-slate-600">Vị trí: <span id="city-name" class="font-bold text-sky-600">--</span></p>
+                    <p class="mt-2 text-sm">
+                        <a href="https://phamducngoc.com/huong-va-goc-nghieng-tot-nhat-lap-dat-tam-pin-nang-luong-mat-troi/" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-sky-800 hover:underline transition-colors">
+                            Xem bài viết chi tiết về hướng & góc nghiêng &rarr;
+                        </a>
+                    </p>
+                 </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center pt-6 mt-6 border-t border-slate-200">
+             <a href="https://phamducngoc.com/den-nang-luong-mat-troi/" target="_blank" rel="noopener noreferrer" class="text-sm text-sky-600 hover:text-sky-800 hover:underline transition-colors">
+                Tìm hiểu thêm về Đèn năng lượng mặt trời &rarr;
+            </a>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const citiesData = [
+                { name: "An Giang", sunHours: 4.9, tiltYear: "10.5°", tiltSummer: "0.5°", tiltWinter: "20.5°-25.5°" },
+                { name: "Bà Rịa - Vũng Tàu", sunHours: 5.0, tiltYear: "10.6°", tiltSummer: "0.6°", tiltWinter: "20.6°-25.6°" },
+                { name: "Bắc Giang", sunHours: 4.1, tiltYear: "21.4°", tiltSummer: "11.4°", tiltWinter: "31.4°-36.4°" },
+                { name: "Bắc Kạn", sunHours: 4.0, tiltYear: "22.2°", tiltSummer: "12.2°", tiltWinter: "32.2°-37.2°" },
+                { name: "Bạc Liêu", sunHours: 5.1, tiltYear: "9.3°", tiltSummer: "-0.7°", tiltWinter: "19.3°-24.3°" },
+                { name: "Bắc Ninh", sunHours: 4.2, tiltYear: "21.1°", tiltSummer: "11.1°", tiltWinter: "31.1°-36.1°" },
+                { name: "Bến Tre", sunHours: 5.0, tiltYear: "10.2°", tiltSummer: "0.2°", tiltWinter: "20.2°-25.2°" },
+                { name: "Bình Định", sunHours: 4.8, tiltYear: "13.9°", tiltSummer: "3.9°", tiltWinter: "23.9°-28.9°" },
+                { name: "Bình Dương", sunHours: 5.1, tiltYear: "11.1°", tiltSummer: "1.1°", tiltWinter: "21.1°-26.1°" },
+                { name: "Bình Phước", sunHours: 5.0, tiltYear: "11.8°", tiltSummer: "1.8°", tiltWinter: "21.8°-26.8°" },
+                { name: "Bình Thuận", sunHours: 5.2, tiltYear: "11.0°", tiltSummer: "1.0°", tiltWinter: "21.0°-26.0°" },
+                { name: "Cà Mau", sunHours: 5.2, tiltYear: "8.6°", tiltSummer: "-1.4°", tiltWinter: "18.6°-23.6°" },
+                { name: "Cần Thơ", sunHours: 5.2, tiltYear: "10.0°", tiltSummer: "0.0°", tiltWinter: "20.0°-25.0°" },
+                { name: "Cao Bằng", sunHours: 3.9, tiltYear: "22.7°", tiltSummer: "12.7°", tiltWinter: "32.7°-37.7°" },
+                { name: "Đà Nẵng", sunHours: 4.8, tiltYear: "16.1°", tiltSummer: "6.1°", tiltWinter: "26.1°-31.1°" },
+                { name: "Đắk Lắk", sunHours: 4.9, tiltYear: "12.8°", tiltSummer: "2.8°", tiltWinter: "22.8°-27.8°" },
+                { name: "Đắk Nông", sunHours: 5.0, tiltYear: "12.3°", tiltSummer: "2.3°", tiltWinter: "22.3°-27.3°" },
+                { name: "Điện Biên", sunHours: 4.3, tiltYear: "21.7°", tiltSummer: "11.7°", tiltWinter: "31.7°-36.7°" },
+                { name: "Đồng Nai", sunHours: 5.1, tiltYear: "11.0°", tiltSummer: "1.0°", tiltWinter: "21.0°-26.0°" },
+                { name: "Đồng Tháp", sunHours: 5.0, tiltYear: "10.5°", tiltSummer: "0.5°", tiltWinter: "20.5°-25.5°" },
+                { name: "Gia Lai", sunHours: 4.9, tiltYear: "13.8°", tiltSummer: "3.8°", tiltWinter: "23.8°-28.8°" },
+                { name: "Hà Giang", sunHours: 3.8, tiltYear: "22.8°", tiltSummer: "12.8°", tiltWinter: "32.8°-37.8°" },
+                { name: "Hà Nam", sunHours: 4.2, tiltYear: "20.5°", tiltSummer: "10.5°", tiltWinter: "30.5°-35.5°" },
+                { name: "Hà Nội", sunHours: 4.1, tiltYear: "21.0°", tiltSummer: "11.0°", tiltWinter: "31.0°-36.0°" },
+                { name: "Hà Tĩnh", sunHours: 4.4, tiltYear: "18.2°", tiltSummer: "8.2°", tiltWinter: "28.2°-33.2°" },
+                { name: "Hải Dương", sunHours: 4.3, tiltYear: "21.0°", tiltSummer: "11.0°", tiltWinter: "31.0°-36.0°" },
+                { name: "Hải Phòng", sunHours: 4.3, tiltYear: "20.8°", tiltSummer: "10.8°", tiltWinter: "30.8°-35.8°" },
+                { name: "Hậu Giang", sunHours: 5.1, tiltYear: "9.9°", tiltSummer: "-0.1°", tiltWinter: "19.9°-24.9°" },
+                { name: "Hòa Bình", sunHours: 4.1, tiltYear: "20.7°", tiltSummer: "10.7°", tiltWinter: "30.7°-35.7°" },
+                { name: "Hưng Yên", sunHours: 4.2, tiltYear: "20.8°", tiltSummer: "10.8°", tiltWinter: "30.8°-35.8°" },
+                { name: "Khánh Hòa", sunHours: 5.1, tiltYear: "12.3°", tiltSummer: "2.3°", tiltWinter: "22.3°-27.3°" },
+                { name: "Kiên Giang", sunHours: 5.1, tiltYear: "10.0°", tiltSummer: "0.0°", tiltWinter: "20.0°-25.0°" },
+                { name: "Kon Tum", sunHours: 4.8, tiltYear: "14.4°", tiltSummer: "4.4°", tiltWinter: "24.4°-29.4°" },
+                { name: "Lai Châu", sunHours: 4.2, tiltYear: "22.0°", tiltSummer: "12.0°", tiltWinter: "32.0°-37.0°" },
+                { name: "Lâm Đồng", sunHours: 4.9, tiltYear: "11.7°", tiltSummer: "1.7°", tiltWinter: "21.7°-26.7°" },
+                { name: "Lạng Sơn", sunHours: 4.0, tiltYear: "21.9°", tiltSummer: "11.9°", tiltWinter: "31.9°-36.9°" },
+                { name: "Lào Cai", sunHours: 4.1, tiltYear: "22.5°", tiltSummer: "12.5°", tiltWinter: "32.5°-37.5°" },
+                { name: "Long An", sunHours: 5.0, tiltYear: "10.6°", tiltSummer: "0.6°", tiltWinter: "20.6°-25.6°" },
+                { name: "Nam Định", sunHours: 4.3, tiltYear: "20.2°", tiltSummer: "10.2°", tiltWinter: "30.2°-35.2°" },
+                { name: "Nghệ An", sunHours: 4.4, tiltYear: "19.2°", tiltSummer: "9.2°", tiltWinter: "29.2°-34.2°" },
+                { name: "Ninh Bình", sunHours: 4.2, tiltYear: "20.1°", tiltSummer: "10.1°", tiltWinter: "30.1°-35.1°" },
+                { name: "Ninh Thuận", sunHours: 5.3, tiltYear: "11.7°", tiltSummer: "1.7°", tiltWinter: "21.7°-26.7°" },
+                { name: "Phú Thọ", sunHours: 4.1, tiltYear: "21.2°", tiltSummer: "11.2°", tiltWinter: "31.2°-36.2°" },
+                { name: "Phú Yên", sunHours: 4.9, tiltYear: "13.2°", tiltSummer: "3.2°", tiltWinter: "23.2°-28.2°" },
+                { name: "Quảng Bình", sunHours: 4.5, tiltYear: "17.5°", tiltSummer: "7.5°", tiltWinter: "27.5°-32.5°" },
+                { name: "Quảng Nam", sunHours: 4.8, tiltYear: "15.5°", tiltSummer: "5.5°", tiltWinter: "25.5°-30.5°" },
+                { name: "Quảng Ngãi", sunHours: 4.8, tiltYear: "15.0°", tiltSummer: "5.0°", tiltWinter: "25.0°-30.0°" },
+                { name: "Quảng Ninh", sunHours: 4.2, tiltYear: "21.1°", tiltSummer: "11.1°", tiltWinter: "31.1°-36.1°" },
+                { name: "Quảng Trị", sunHours: 4.6, tiltYear: "16.7°", tiltSummer: "6.7°", tiltWinter: "26.7°-31.7°" },
+                { name: "Sóc Trăng", sunHours: 5.1, tiltYear: "9.5°", tiltSummer: "-0.5°", tiltWinter: "19.5°-24.5°" },
+                { name: "Sơn La", sunHours: 4.2, tiltYear: "21.3°", tiltSummer: "11.3°", tiltWinter: "31.3°-36.3°" },
+                { name: "Tây Ninh", sunHours: 5.0, tiltYear: "11.4°", tiltSummer: "1.4°", tiltWinter: "21.4°-26.4°" },
+                { name: "Thái Bình", sunHours: 4.3, tiltYear: "20.5°", tiltSummer: "10.5°", tiltWinter: "30.5°-35.5°" },
+                { name: "Thái Nguyên", sunHours: 4.0, tiltYear: "21.5°", tiltSummer: "11.5°", tiltWinter: "31.5°-36.5°" },
+                { name: "Thanh Hóa", sunHours: 4.3, tiltYear: "20.0°", tiltSummer: "10.0°", tiltWinter: "30.0°-35.0°" },
+                { name: "Thừa Thiên Huế", sunHours: 4.7, tiltYear: "16.4°", tiltSummer: "6.4°", tiltWinter: "26.4°-31.4°" },
+                { name: "Tiền Giang", sunHours: 5.0, tiltYear: "10.4°", tiltSummer: "0.4°", tiltWinter: "20.4°-25.4°" },
+                { name: "TP. Hồ Chí Minh", sunHours: 5.1, tiltYear: "10.8°", tiltSummer: "0.8°", tiltWinter: "20.8°-25.8°" },
+                { name: "Trà Vinh", sunHours: 5.1, tiltYear: "9.8°", tiltSummer: "-0.2°", tiltWinter: "19.8°-24.8°" },
+                { name: "Tuyên Quang", sunHours: 4.0, tiltYear: "22.1°", tiltSummer: "12.1°", tiltWinter: "32.1°-37.1°" },
+                { name: "Vĩnh Long", sunHours: 5.0, tiltYear: "10.1°", tiltSummer: "0.1°", tiltWinter: "20.1°-25.1°" },
+                { name: "Vĩnh Phúc", sunHours: 4.1, tiltYear: "21.3°", tiltSummer: "11.3°", tiltWinter: "31.3°-36.3°" },
+                { name: "Yên Bái", sunHours: 4.0, tiltYear: "21.8°", tiltSummer: "11.8°", tiltWinter: "31.8°-36.8°" },
+            ];
+
+            const citySelector = document.getElementById('city-selector');
+            const wattageSelector = document.getElementById('wattage-selector');
+            const cityNameOutput = document.getElementById('city-name');
+            const dailyOutput = document.getElementById('daily-output');
+            const monthlyOutput = document.getElementById('monthly-output');
+            const yearlyOutput = document.getElementById('yearly-output');
+            const tiltYearRound = document.getElementById('tilt-year-round');
+            const tiltSummer = document.getElementById('tilt-summer');
+            const tiltWinter = document.getElementById('tilt-winter');
+            
+            citiesData.forEach((city, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = city.name;
+                citySelector.appendChild(option);
+            });
+            const defaultCityIndex = citiesData.findIndex(c => c.name === "TP. Hồ Chí Minh");
+            citySelector.value = defaultCityIndex >= 0 ? defaultCityIndex : 0;
+
+            function updateVisualizationAndCalculation() {
+                const selectedCityIndex = citySelector.value;
+                const selectedCity = citiesData[selectedCityIndex];
+                const selectedWattage = parseFloat(wattageSelector.value);
+                
+                cityNameOutput.textContent = selectedCity.name;
+                
+                tiltYearRound.textContent = selectedCity.tiltYear;
+                tiltSummer.textContent = selectedCity.tiltSummer;
+                tiltWinter.textContent = selectedCity.tiltWinter;
+
+                const performanceRatio = 0.75;
+                const panelWattageInKW = selectedWattage / 1000;
+                
+                const dailyKWh = panelWattageInKW * selectedCity.sunHours * performanceRatio;
+                const monthlyKWh = dailyKWh * 30;
+                const yearlyKWh = dailyKWh * 365;
+
+                dailyOutput.textContent = `${dailyKWh.toFixed(2)} kWh`;
+                monthlyOutput.textContent = `${monthlyKWh.toFixed(2)} kWh`;
+                yearlyOutput.textContent = `${yearlyKWh.toFixed(2)} kWh`;
+            }
+
+            citySelector.addEventListener('change', updateVisualizationAndCalculation);
+            wattageSelector.addEventListener('change', updateVisualizationAndCalculation);
+
+            updateVisualizationAndCalculation();
+        });
+    </script>
+</body>
+</html>
+

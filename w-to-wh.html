@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Tính Điện Năng (W ↔ Wh) - Phạm Đức Ngọc</title>
+    <!-- CSS tùy chỉnh cho toàn bộ trang -->
+    <style>
+        /* CSS Reset and Body Styling */
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Header Styling */
+        .site-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .site-header a {
+            display: inline-block;
+        }
+        .site-header img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* Main content takes available space */
+        main {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        /* Calculator Widget Container */
+        .calculator-widget-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+        }
+
+        /* Box-sizing for all elements inside the widget */
+        .calculator-widget-container *,
+        .calculator-widget-container *:before,
+        .calculator-widget-container *:after {
+            box-sizing: border-box;
+        }
+        
+        /* Mode Switcher */
+        .calculator-widget-container .mode-switcher {
+            display: flex;
+            background-color: #f3f4f6;
+            border-radius: 0.75rem;
+            padding: 0.25rem;
+            margin-bottom: 2rem;
+        }
+        .calculator-widget-container .mode-switcher button {
+            flex: 1 1 0%;
+            padding: 0.5rem;
+            border: none;
+            background-color: transparent;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .calculator-widget-container .mode-switcher button.active {
+            background-color: #ffffff;
+            color: #16a34a;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+
+        /* General Typography and Spacing */
+        .calculator-widget-container .text-center { text-align: center; }
+        .calculator-widget-container h2 {
+            font-size: 1.5rem; line-height: 2rem; font-weight: 700; color: #1f2937; margin: 0; padding: 0;
+        }
+        .calculator-widget-container h3 {
+            font-size: 1.125rem; line-height: 1.75rem; font-weight: 600; color: #1f2937; margin: 0; padding: 0;
+        }
+        .calculator-widget-container p {
+            margin: 0; padding: 0; color: #4b5563;
+        }
+        .calculator-widget-container .mt-2 { margin-top: 0.5rem; }
+        .calculator-widget-container .mt-4 { margin-top: 1rem; }
+        .calculator-widget-container .mt-8 { margin-top: 2rem; }
+        .calculator-widget-container .pt-6 { padding-top: 1.5rem; }
+        .calculator-widget-container .border-t { border-top: 1px solid #e5e7eb; }
+        .calculator-widget-container .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
+
+        /* Form Elements */
+        .calculator-widget-container label {
+            display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;
+        }
+        .calculator-widget-container .relative { position: relative; }
+        .calculator-widget-container input[type="number"] {
+            display: block; width: 100%; padding: 0.75rem 1rem; background-color: #f3f4f6;
+            border: 1px solid #e5e7eb; border-radius: 0.5rem; color: #111827;
+            transition: all 0.2s ease-in-out; -moz-appearance: textfield;
+        }
+        .calculator-widget-container input[type="number"]::-webkit-inner-spin-button,
+        .calculator-widget-container input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none; margin: 0;
+        }
+        .calculator-widget-container input[type="number"]:focus {
+            outline: 2px solid transparent; outline-offset: 2px; border-color: #22c55e;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.4);
+        }
+        .calculator-widget-container .input-unit {
+            position: absolute; top: 0; bottom: 0; right: 1rem; display: flex; align-items: center; color: #6b7280;
+        }
+        
+        /* Buttons */
+        .calculator-widget-container .button-container { display: flex; flex-direction: column; gap: 1rem; }
+        .calculator-widget-container button {
+            width: 100%; padding: 0.75rem 1.5rem; font-weight: 600; border-radius: 0.5rem;
+            border: none; cursor: pointer; transition: all 0.2s ease-in-out;
+        }
+        .calculator-widget-container #calculateBtn-embed {
+            background-color: #16a34a; color: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .calculator-widget-container #calculateBtn-embed:hover { background-color: #15803d; }
+        .calculator-widget-container #resetBtn-embed { background-color: #e5e7eb; color: #374151; }
+        .calculator-widget-container #resetBtn-embed:hover { background-color: #d1d5db; }
+
+        /* Result and Message Display */
+        .calculator-widget-container #result-container-embed {
+            padding: 1.5rem; background-color: #f0fdf4; border: 2px dashed #bbf7d0;
+            border-radius: 0.5rem; text-align: center;
+        }
+        .calculator-widget-container .hidden { display: none; }
+        .calculator-widget-container #result-container-embed p { font-size: 1.125rem; color: #374151; }
+        .calculator-widget-container #result-text-embed {
+            font-size: 1.875rem; font-weight: 700; color: #166534; margin-top: 0.5rem;
+        }
+        .calculator-widget-container #error-message-embed {
+            text-align: center; color: #dc2626; font-weight: 500; min-height: 1.5rem;
+        }
+        
+        /* Formula Box */
+        .calculator-widget-container .formula-box {
+            margin-top: 0.75rem; padding: 1rem; background-color: #f3f4f6;
+            border-radius: 0.5rem; text-align: center;
+        }
+        .calculator-widget-container .formula-box p { font-size: 1.125rem; }
+        .calculator-widget-container .font-bold { font-weight: 700; }
+        
+        /* Footer Styling */
+        .site-footer {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .site-footer a {
+            color: #16a34a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .site-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Styles */
+        @media (min-width: 640px) {
+            .calculator-widget-container h2 { font-size: 1.875rem; line-height: 2.25rem; }
+            .calculator-widget-container #result-text-embed { font-size: 2.25rem; line-height: 2.5rem; }
+            .calculator-widget-container .button-container { flex-direction: row; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <a href="https://phamducngoc.com/" target="_blank" rel="noopener noreferrer">
+            <img src="https://phamducngoc.com/wp-content/uploads/2025/08/pham-duc-ngoc.png" alt="Logo Phạm Đức Ngọc">
+        </a>
+    </header>
+
+    <main>
+        <!-- Phần thân HTML của công cụ tính -->
+        <div class="calculator-widget-container">
+            <div class="mode-switcher">
+                <button id="mode-w-to-wh" class="active">Watts → Wh</button>
+                <button id="mode-wh-to-w">Wh → Watts</button>
+            </div>
+            
+            <div class="text-center">
+                <h2 id="calculator-title">Công cụ tính Watt-giờ (Wh)</h2>
+                <p class="mt-2" id="calculator-subtitle">Nhập công suất (W) và thời gian (giờ) để tính năng lượng tiêu thụ.</p>
+            </div>
+
+            <div class="mt-8 space-y-6">
+                <div>
+                    <label for="input1-embed" id="label-input1">Công suất (Watts)</label>
+                    <div class="relative">
+                        <input type="number" id="input1-embed" placeholder="Ví dụ: 100">
+                        <span class="input-unit" id="unit-input1">W</span>
+                    </div>
+                </div>
+                <div>
+                    <label for="input2-embed">Thời gian (giờ)</label>
+                    <div class="relative">
+                        <input type="number" id="input2-embed" placeholder="Ví dụ: 5">
+                        <span class="input-unit">giờ</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 button-container">
+                <button id="calculateBtn-embed">Tính toán</button>
+                <button id="resetBtn-embed">Đặt lại</button>
+            </div>
+            
+            <p id="error-message-embed" class="mt-4"></p>
+            
+            <div id="result-container-embed" class="mt-4 hidden">
+                <p id="result-label">Năng lượng tiêu thụ:</p>
+                <p id="result-text-embed"></p>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t">
+                <h3 id="formula-title">Công thức</h3>
+                <div class="formula-box">
+                    <p id="formula-text"><span class="font-bold">Năng lượng (Wh)</span> = <span class="font-bold">Công suất (W)</span> × <span class="font-bold">Thời gian (h)</span></p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="site-footer">
+        <p>Chi tiết bài viết: <a href="https://phamducngoc.com/cong-cu-tu-dong-tinh-w-sang-wh-va-nguoc-lai-tu-wh-sang-w/" target="_blank" rel="noopener noreferrer">Công cụ tự động tính W sang Wh và ngược lại từ Wh sang W</a></p>
+    </footer>
+
+    <!-- JavaScript cho chức năng của công cụ tính -->
+    <script>
+        (function() {
+            if (document.getElementById('calculateBtn-embed')?.dataset.initialized) {
+                return;
+            }
+            
+            let currentMode = 'wToWh'; // 'wToWh' or 'whToW'
+
+            // Element selectors
+            const modeWToWhBtn = document.getElementById('mode-w-to-wh');
+            const modeWhToWBtn = document.getElementById('mode-wh-to-w');
+            
+            const calcTitle = document.getElementById('calculator-title');
+            const calcSubtitle = document.getElementById('calculator-subtitle');
+
+            const labelInput1 = document.getElementById('label-input1');
+            const input1 = document.getElementById('input1-embed');
+            const unitInput1 = document.getElementById('unit-input1');
+            const input2 = document.getElementById('input2-embed');
+            
+            const calculateBtn = document.getElementById('calculateBtn-embed');
+            const resetBtn = document.getElementById('resetBtn-embed');
+            
+            const resultContainer = document.getElementById('result-container-embed');
+            const resultLabel = document.getElementById('result-label');
+            const resultText = document.getElementById('result-text-embed');
+            const errorMessage = document.getElementById('error-message-embed');
+
+            const formulaTitle = document.getElementById('formula-title');
+            const formulaText = document.getElementById('formula-text');
+
+            const formatNumber = (num) => new Intl.NumberFormat('vi-VN').format(num);
+
+            const setMode = (mode) => {
+                currentMode = mode;
+                reset();
+
+                if (mode === 'wToWh') {
+                    modeWToWhBtn.classList.add('active');
+                    modeWhToWBtn.classList.remove('active');
+
+                    calcTitle.textContent = 'Công cụ tính Watt-giờ (Wh)';
+                    calcSubtitle.textContent = 'Nhập công suất (W) và thời gian (giờ) để tính năng lượng tiêu thụ.';
+                    labelInput1.textContent = 'Công suất (Watts)';
+                    unitInput1.textContent = 'W';
+                    input1.placeholder = 'Ví dụ: 100';
+                    resultLabel.textContent = 'Năng lượng tiêu thụ:';
+                    formulaTitle.textContent = 'Công thức tính Watt-giờ';
+                    formulaText.innerHTML = '<span class="font-bold">Năng lượng (Wh)</span> = <span class="font-bold">Công suất (W)</span> × <span class="font-bold">Thời gian (h)</span>';
+                } else { // 'whToW'
+                    modeWhToWBtn.classList.add('active');
+                    modeWToWhBtn.classList.remove('active');
+
+                    calcTitle.textContent = 'Công cụ tính Watts (W)';
+                    calcSubtitle.textContent = 'Nhập năng lượng (Wh) và thời gian (giờ) để tính công suất.';
+                    labelInput1.textContent = 'Năng lượng (Watt-giờ)';
+                    unitInput1.textContent = 'Wh';
+                    input1.placeholder = 'Ví dụ: 500';
+                    resultLabel.textContent = 'Công suất yêu cầu:';
+                    formulaTitle.textContent = 'Công thức tính Watts';
+                    formulaText.innerHTML = '<span class="font-bold">Công suất (W)</span> = <span class="font-bold">Năng lượng (Wh)</span> ÷ <span class="font-bold">Thời gian (h)</span>';
+                }
+            };
+
+            const calculate = () => {
+                const val1 = parseFloat(input1.value);
+                const val2 = parseFloat(input2.value);
+                
+                errorMessage.textContent = '';
+                resultContainer.classList.add('hidden');
+                
+                if (input1.value.trim() === '' || input2.value.trim() === '') {
+                    errorMessage.textContent = 'Vui lòng nhập đầy đủ các giá trị.';
+                    return;
+                }
+                if (isNaN(val1) || isNaN(val2)) {
+                    errorMessage.textContent = 'Vui lòng nhập giá trị số hợp lệ.';
+                    return;
+                }
+                if (val1 < 0 || val2 < 0) {
+                    errorMessage.textContent = 'Các giá trị không được là số âm.';
+                    return;
+                }
+
+                if (currentMode === 'wToWh') {
+                    const wattHours = val1 * val2;
+                    resultText.textContent = `${formatNumber(parseFloat(wattHours.toFixed(2)))} Wh`;
+                } else { // 'whToW'
+                    if (val2 === 0) {
+                        errorMessage.textContent = 'Thời gian không thể bằng 0.';
+                        return;
+                    }
+                    const watts = val1 / val2;
+                    resultText.textContent = `${formatNumber(parseFloat(watts.toFixed(2)))} W`;
+                }
+                resultContainer.classList.remove('hidden');
+            };
+            
+            const reset = () => {
+                input1.value = '';
+                input2.value = '';
+                resultContainer.classList.add('hidden');
+                errorMessage.textContent = '';
+                input1.focus();
+            };
+
+            // Event Listeners
+            modeWToWhBtn.addEventListener('click', () => setMode('wToWh'));
+            modeWhToWBtn.addEventListener('click', () => setMode('whToW'));
+            calculateBtn.addEventListener('click', calculate);
+            resetBtn.addEventListener('click', reset);
+            
+            input1.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') calculate();
+            });
+            input2.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') calculate();
+            });
+
+            if (calculateBtn) {
+               calculateBtn.dataset.initialized = 'true';
+            }
+        })();
+    </script>
+</body>
+</html>
+

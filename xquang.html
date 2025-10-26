@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhập Liệu X-Quang </title>
+    <style>
+        /* (C) 2025. Phạm Đức Ngọc - https://phamducngoc.com */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 95%;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            margin-top: 0;
+        }
+        
+        /* === MỚI: Bộ chọn ngày === */
+        .session-selector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 6px;
+        }
+        .session-selector label {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        #session-date-picker {
+            padding: 8px 12px;
+            font-size: 1.1rem;
+            border-radius: 4px; 
+            border: 1px solid #ccc;
+            /* Style cho trạng thái disabled */
+            background-color: #eee; 
+        }
+        #session-date-picker:enabled {
+            background-color: #fff;
+        }
+        /* === KẾT THÚC === */
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 150px;
+        }
+        .form-group.full-width {
+            flex-basis: 100%;
+        }
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        .result-radio-list {
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 5px;
+            background: #fdfdfd;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
+            gap: 10px;
+        }
+        .result-radio-list label {
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .result-radio-list label:hover {
+            background-color: #f0f0f0;
+        }
+        .result-radio-list input[type="radio"] {
+            margin-right: 10px;
+            height: 1.1em;
+            width: 1.1em;
+            flex-shrink: 0;
+        }
+        
+        .form-group textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+            min-height: 80px; 
+            margin-top: 5px;
+            white-space: pre-wrap; 
+        }
+        
+        .button-wrapper {
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px; 
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+        }
+        .button-group button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #btn-submit { 
+            background-color: #007bff; 
+            color: white; 
+            font-size: 1.6rem; 
+            padding: 18px 40px;
+        }
+        #btn-print { 
+            background-color: #28a745; 
+            color: white; 
+            font-size: 1.6rem; 
+            padding: 18px 40px; 
+        }
+        #btn-export { background-color: #17a2b8; color: white; }
+        #btn-done { background-color: #6c757d; color: white; }
+        
+        /* CSS cho nút bị vô hiệu hóa */
+        #btn-submit:disabled {
+            background-color: #99caff;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        #status-message { 
+            width: 100%; 
+            text-align: center; 
+            margin-top: 15px; 
+            font-weight: bold; 
+            height: 1.2em; /* Giữ chiều cao ổn định */
+        }
+
+        /* Bảng dữ liệu */
+        .table-container { width: 100%; overflow-x: auto; }
+        #patient-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        #patient-table th,
+        #patient-table td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 0.95rem; white-space: pre-wrap; }
+        #patient-table th { background-color: #f2f2f2; color: #333; }
+        #patient-table tr:nth-child(even) { background-color: #f9f9f9; }
+        #patient-table tr:hover { background-color: #e9ecef; }
+        .action-buttons button { font-size: 0.85rem; padding: 5px 10px; margin-right: 5px; cursor: pointer; }
+        .btn-edit { background-color: #ffc107; border: none; border-radius: 3px; }
+        .btn-delete { background-color: #dc3545; color: white; border: none; border-radius: 3px; }
+        .btn-print-row { background-color: #28a745; color: white; border: none; border-radius: 3px; }
+
+        /* Vùng in */
+        #print-area { display: none; }
+        
+        @page {
+            size: A4;
+            margin: 1cm; 
+        }
+
+        /* === PHẦN IN ẤN ĐÃ ĐƯỢC CẬP NHẬT HOÀN CHỈNH === */
+        @media print {
+            /* 1. Ẩn mọi thứ hoàn toàn */
+            body * {
+                display: none;
+            }
+            
+            /* 2. Chỉ hiển thị vùng in */
+            #print-area, #print-area * {
+                display: block; 
+            }
+            
+            /* 3. Reset body margins */
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            /* 4. Áp dụng style cho vùng in */
+            #print-area {
+                display: block; 
+                position: absolute; 
+                left: 5%;
+                width: 90%; 
+                
+                /* VỊ TRÍ MỚI THEO YÊU CẦU */
+                top: 55%; /* Dịch lên (55% từ lề trên) */
+                height: 12%; /* Chiều cao vùng in */
+                
+                text-align: Center;
+                font-size: 15px; /* CỠ CHỮ MỚI */
+                font-weight: normal; 
+                color: black;
+                white-space: pre-wrap; 
+            }
+        }
+        /* === KẾT THÚC PHẦN IN ẤN === */
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Nhập Kết Quả X-Quang</h1>
+        
+        <!-- === MỚI: Bộ chọn ngày === -->
+        <div class="session-selector">
+            <label for="session-date-picker">Chọn ngày làm việc:</label>
+            <input type="date" id="session-date-picker">
+        </div>
+        
+        <form id="data-form">
+            <input type="hidden" id="editingId" value="">
+            
+            <div class="form-group">
+                <label for="hoTen">Họ và Tên</label>
+                <input type="text" id="hoTen" name="hoTen" required>
+            </div>
+            <div class="form-group">
+                <label for="namSinh">Năm Sinh</label>
+                <input type="number" id="namSinh" name="namSinh" required>
+            </div>
+            <div class="form-group">
+                <label for="soHoSo">Số Hồ Sơ</label>
+                <input type="text" id="soHoSo" name="soHoSo" required>
+            </div>
+            <div class="form-group">
+                <label for="donVi">Đơn Vị</label>
+                <input type="text" id="donVi" name="donVi" required>
+            </div>
+            <div class="form-group">
+                <label for="chiDinh">Chỉ Định</label>
+                <input type="text" id="chiDinh" name="chiDinh" value="Chụp Tim Phổi">
+            </div>
+
+            <div class="form-group full-width">
+                <label>Kết Quả</label>
+                <div class="result-radio-list" id="result-radio-container">
+                    <label>
+                        <input type="radio" name="ketQua" value="Hình tim phổi bình thường" checked>
+                        Hình tim phổi bình thường
+                    </label>
+                    <label>
+                        <input type="radio" name="ketQua" value="Dày thành các nhánh phế quản hai bên phổi.&#10;Bóng tim không to.">
+                        Dày thành các nhánh phế quản hai bên phổi.<br>Bóng tim không to.
+                    </label>
+                    <label>
+                        <input type="radio" name="ketQua" value="Vồng quai động mạch chủ.&#10;Hình tim phổi bình thường">
+                        Vồng quai động mạch chủ.<br>Hình tim phổi bình thường
+                    </label>
+                    <label>
+                        <input type="radio" name="ketQua" value="Đậm rốn phổi trái.&#10;Bóng tim không to.">
+                        Đậm rốn phổi trái.<br>Bóng tim không to.
+                    </label>
+                    <label>
+                        <input type="radio" name="ketQua" value="Đậm rốn phổi hai bên.&#10;Bóng tim không to.">
+                        Đậm rốn phổi hai bên.<br>Bóng tim không to.
+                    </label>
+                    <label>
+                        <input type="radio" name="ketQua" value="khac">
+                        --- Kết Quả Khác ---
+                    </label>
+                </div>
+
+                <textarea id="ketQuaKhac" name="ketQuaKhac" placeholder="Nhập kết quả khác vào đây... (Nhấn Shift + Enter để xuống dòng)" style="display: none; width: 100%; margin-top: 10px;"></textarea>
+            </div>
+
+            <div class="button-wrapper">
+                <div class="button-group">
+                    <button type="submit" id="btn-submit">Nhập (Lưu)</button>
+                    <button type="button" id="btn-print">IN KẾT QUẢ</button>
+                </div>
+            </div>
+            
+            <div id="status-message"></div>
+        </form>
+
+        <hr>
+
+        <!-- === THAY ĐỔI: Tiêu đề động === -->
+        <h2 id="patient-list-title">Danh sách Bệnh nhân</h2>
+        
+        <div class="table-container">
+            <table id="patient-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Họ Tên</th>
+                        <th>Năm Sinh</th>
+                        <th>Số Hồ Sơ</th>
+                        <th>Đơn Vị</th>
+                        <th>Kết Quả</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="patient-table-body"></tbody>
+            </table>
+        </div>
+
+        <div class="button-wrapper">
+            <div class="button-group">
+                <button type="button" id="btn-done">Làm Mới Form</button>
+                <button type="button" id="btn-export">Xuất Excel (CSV)</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="print-area"></div>
+
+    <script>
+        // (C) 2025. Phạm Đức Ngọc - https://phamducngoc.com
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // === URL Google Apps Script ===
+            // URL MỚI CỦA BẠN ĐÃ ĐƯỢC CẬP NHẬT TẠI ĐÂY
+            const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzZHFKZkt3UVRVtXIi8G6G0Upw7u3CKuxtmXxfkL3ICekjDqoA2wv9zQjvY02F2Krt9Bg/exec';
+
+            const form = document.getElementById('data-form');
+            const btnSubmit = document.getElementById('btn-submit');
+            const btnPrint = document.getElementById('btn-print');
+            const btnDone = document.getElementById('btn-done');
+            const btnExport = document.getElementById('btn-export');
+            const statusMessage = document.getElementById('status-message');
+            const printArea = document.getElementById('print-area');
+            const tableBody = document.getElementById('patient-table-body');
+            const editingIdInput = document.getElementById('editingId');
+            const inputs = form.querySelectorAll('input[type="text"], input[type="number"]');
+
+            const datePicker = document.getElementById('session-date-picker');
+            const listTitle = document.getElementById('patient-list-title');
+
+            const ketQuaRadios = document.getElementsByName('ketQua');
+            const ketQuaKhac = document.getElementById('ketQuaKhac');
+            const radioKhac = document.querySelector('input[name="ketQua"][value="khac"]');
+            
+            // Biến toàn cục để giữ dữ liệu đang xem
+            let currentPatientData = [];
+
+            // Hàm hiển thị trạng thái tải/lưu
+            function setLoading(isLoading, message = 'Đang tải...') {
+                if (isLoading) {
+                    statusMessage.innerText = message;
+                    statusMessage.style.color = '#0056b3';
+                    // Vô hiệu hóa các nút chính và bộ chọn ngày
+                    btnSubmit.disabled = true;
+                    btnSubmit.style.opacity = 0.7; // Dùng opacity thay vì style
+                    datePicker.disabled = true;
+                } else {
+                    statusMessage.innerText = '';
+                    btnSubmit.disabled = false;
+                    btnSubmit.style.opacity = 1;
+                    datePicker.disabled = false;
+                }
+            }
+            
+            // Hàm hiển thị thông báo (thành công/lỗi)
+            function showStatus(message, isError = false) {
+                statusMessage.innerText = message;
+                statusMessage.style.color = isError ? '#dc3545' : '#28a745';
+                setTimeout(() => { 
+                    if (statusMessage.innerText === message) {
+                        statusMessage.innerText = ''; 
+                    }
+                }, 4000);
+            }
+
+            // Hàm lấy chuỗi ngày YYYY-MM-DD
+            function getTodayString() {
+                const a = new Date();
+                const date = `${a.getFullYear()}-${(a.getMonth()+1).toString().padStart(2,'0')}-${a.getDate().toString().padStart(2,'0')}`;
+                return date;
+            }
+
+            
+            // Hàm tải danh sách bệnh nhân từ Google Script
+            async function fetchPatientList(date) {
+                
+                // Kiểm tra URL trước khi gọi
+                if (WEB_APP_URL.includes('DÁN_URL_MỚI_CỦA_BẠN')) {
+                    showStatus('Lỗi: Bạn chưa dán URL Ứng dụng Web vào tệp index.html', true);
+                    return [];
+                }
+
+                setLoading(true, `Đang tải dữ liệu ngày ${date}...`);
+                try {
+                    const response = await fetch(`${WEB_APP_URL}?action=get&date=${date}`);
+                    if (!response.ok) {
+                        throw new Error(`Lỗi máy chủ: ${response.statusText}`);
+                    }
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        return data.data || []; // Trả về mảng data
+                    } else {
+                        // === CẢI TIẾN: Bắt lỗi SPREADSHEET_ID ===
+                        if (data.message && (data.message.includes("openById") || data.message.includes("getSheetByName"))) {
+                             throw new Error("Lỗi Backend: Không thể mở Google Sheet. Vui lòng kiểm tra SPREADSHEET_ID và tên 'DuLieuBenhNhan' trong file Code.gs!");
+                        }
+                        throw new Error(data.message || 'Không thể tải dữ liệu');
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi tải danh sách:', error);
+                    showStatus(`${error.message}`, true);
+                    return []; // Trả về mảng rỗng nếu lỗi
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+
+            // Hàm render Bảng
+            async function renderTable() {
+                const selectedDate = datePicker.value;
+                if (!selectedDate) return;
+
+                // Cập nhật tiêu đề
+                listTitle.innerText = `Danh sách Bệnh nhân ngày ${selectedDate}`;
+                
+                // Tải dữ liệu từ máy chủ
+                currentPatientData = await fetchPatientList(selectedDate);
+
+                tableBody.innerHTML = '';
+                if (!currentPatientData || currentPatientData.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Chưa có dữ liệu</td></tr>';
+                    return;
+                }
+                
+                // Sắp xếp dữ liệu theo ID (thường là timestamp)
+                currentPatientData.sort((a, b) => a.id - b.id);
+                
+                currentPatientData.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const formattedKetQua = item.ketQua ? item.ketQua.replace(/\n/g, '<br>') : '';
+                    
+                    tr.innerHTML = `
+                        <td>${item.id}</td>
+                        <td>${item.hoTen}</td>
+                        <td>${item.namSinh}</td>
+                        <td>${item.soHoSo}</td>
+                        <td>${item.donVi}</td>
+                        <td>${formattedKetQua}</td> 
+                        <td class="action-buttons">
+                            <button class="btn-edit" onclick="editData(${item.id})">Sửa</button>
+                            <button class="btn-delete" onclick="deleteData(${item.id})">Xóa</button>
+                            <button class="btn-print-row" onclick="printData(${item.id})">In</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            }
+            
+            // Hàm lấy kết quả từ Form
+            function getFinalResult() {
+                let selectedValue = document.querySelector('input[name="ketQua"]:checked').value;
+                if (selectedValue === 'khac') {
+                    return ketQuaKhac.value;
+                }
+                // Chuyển đổi mã &#10; (xuống dòng HTML) thành ký tự \n (xuống dòng thật)
+                return selectedValue.replace(/&#10;/g, '\n');
+            }
+
+            // Hàm xử lý Form
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                
+                const finalKetQua = getFinalResult();
+                if (!finalKetQua || (radioKhac.checked && !finalKetQua)) {
+                    console.error("Vui lòng chọn kết quả hoặc nhập kết quả khác.");
+                    showStatus("Lỗi: Vui lòng chọn hoặc nhập kết quả.", true);
+                    return;
+                }
+
+                const formData = {
+                    hoTen: document.getElementById('hoTen').value,
+                    namSinh: document.getElementById('namSinh').value,
+                    soHoSo: document.getElementById('soHoSo').value,
+                    donVi: document.getElementById('donVi').value,
+                    chiDinh: document.getElementById('chiDinh').value,
+                    ketQua: finalKetQua
+                };
+
+                const editingId = editingIdInput.value;
+                const selectedDate = datePicker.value;
+                
+                setLoading(true, 'Đang lưu...');
+
+                try {
+                    let url = '';
+                    let action = '';
+                    
+                    if (editingId) {
+                        // --- CẬP NHẬT (UPDATE) ---
+                        action = 'update';
+                        formData.id = editingId;
+                        url = `${WEB_APP_URL}?action=update&id=${editingId}`;
+                    } else {
+                        // --- THÊM MỚI (ADD) ---
+                        action = 'add';
+                        formData.id = new Date().getTime(); // Gán ID ở client
+                        url = `${WEB_APP_URL}?action=add&date=${selectedDate}`;
+                    }
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        mode: 'no-cors', // Cần thiết cho Google Script redirect
+                        cache: 'no-cache',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    // Lưu ý: fetch với 'no-cors' sẽ trả về response 'opaque'
+                    // Chúng ta không thể đọc status hay body, nên phải giả định thành công
+                    // và dựa vào việc renderTable() để thấy thay đổi.
+                    
+                    if (action === 'update') {
+                        showStatus('Đã cập nhật thành công!');
+                    } else {
+                        showStatus('Đã nhập thành công!');
+                    }
+                    
+                    // Tải lại bảng để thấy thay đổi
+                    await renderTable(); 
+                    resetForm();
+                    printArea.innerText = formData.ketQua;
+
+                } catch (error) {
+                    console.error('Lỗi khi lưu:', error);
+                    showStatus(`Lỗi: ${error.message}`, true);
+                } finally {
+                    setLoading(false);
+                }
+            });
+
+            // --- Các hàm Sửa / Xóa / In / Reset ---
+            
+            window.editData = function(id) {
+                const item = currentPatientData.find(item => item.id == id);
+                if (!item) return;
+
+                document.getElementById('hoTen').value = item.hoTen;
+                document.getElementById('namSinh').value = item.namSinh;
+                document.getElementById('soHoSo').value = item.soHoSo;
+                document.getElementById('donVi').value = item.donVi;
+                document.getElementById('chiDinh').value = item.chiDinh;
+                
+                let matched = false;
+                ketQuaRadios.forEach(radio => {
+                    // So sánh giá trị \n (từ CSDL) với \n (chuyển từ &#10;)
+                    const radioValue = radio.value.replace(/&#10;/g, '\n');
+                    if (radioValue === item.ketQua) {
+                        radio.checked = true;
+                        matched = true;
+                    }
+                });
+
+                if (matched) {
+                    ketQuaKhac.style.display = 'none';
+                    ketQuaKhac.value = '';
+                } else {
+                    // Không khớp với lựa chọn nào, chọn "khac"
+                    radioKhac.checked = true;
+                    ketQuaKhac.value = item.ketQua;
+                    ketQuaKhac.style.display = 'block';
+                }
+
+                editingIdInput.value = item.id;
+                btnSubmit.innerText = 'Cập Nhật';
+                btnSubmit.style.backgroundColor = '#ffc107';
+                document.getElementById('hoTen').focus();
+            }
+
+            window.deleteData = async function(id) {
+                if (!confirm(`Bạn có chắc chắn muốn xóa bệnh nhân (ID: ${id})?`)) return;
+                
+                setLoading(true, 'Đang xóa...');
+                try {
+                    const response = await fetch(`${WEB_APP_URL}?action=delete&id=${id}`, {
+                        method: 'POST',
+                        mode: 'no-cors'
+                    });
+                    
+                    showStatus('Đã xóa thành công!');
+                    await renderTable();
+
+                } catch (error) {
+                    console.error('Lỗi khi xóa:', error);
+                    showStatus(`Lỗi: ${error.message}`, true);
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            window.printData = function(id) {
+                const item = currentPatientData.find(item => item.id == id);
+                if (!item) {
+                    console.error('Không tìm thấy dữ liệu để in.');
+                    return;
+                }
+                printArea.innerText = item.ketQua;
+                window.print();
+            }
+
+            function resetResultFields() {
+                ketQuaKhac.value = '';
+                ketQuaKhac.style.display = 'none';
+                document.querySelector('input[name="ketQua"][value="Hình tim phổi bình thường"]').checked = true;
+            }
+
+            function resetForm() {
+                form.reset();
+                resetResultFields();
+                printArea.innerText = '';
+                editingIdInput.value = '';
+                document.getElementById('chiDinh').value = 'Chụp Tim Phổi';
+                btnSubmit.innerText = 'Nhập (Lưu)';
+                btnSubmit.style.backgroundColor = '#007bff';
+                document.getElementById('hoTen').focus();
+            }
+            
+            btnDone.addEventListener('click', resetForm);
+
+            // --- Logic Nút In và Chọn Kết Quả ---
+            ketQuaRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'khac') {
+                        ketQuaKhac.style.display = 'block';
+                        ketQuaKhac.focus();
+                    } else {
+                        ketQuaKhac.style.display = 'none';
+                    }
+                });
+            });
+
+            btnPrint.addEventListener('click', function () {
+                const finalKetQua = getFinalResult();
+                if (!finalKetQua || (radioKhac.checked && !finalKetQua)) {
+                    console.error("Chưa có kết quả để in.");
+                    return;
+                }
+                printArea.innerText = finalKetQua;
+                window.print();
+            });
+
+            // --- Logic Nút Xuất Excel ---
+            btnExport.addEventListener('click', function() {
+                const db = currentPatientData;
+                const selectedDate = datePicker.value;
+
+                if (db.length === 0) {
+                    console.error("Không có dữ liệu để xuất."); return;
+                }
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+                const headers = ["ID", "Ho Ten", "Nam Sinh", "So Ho So", "Don Vi", "Chi Dinh", "Ket Qua"];
+                csvContent += headers.join(",") + "\r\n";
+                db.forEach(item => {
+                    const ketQua = `"${(item.ketQua || '').replace(/"/g, '""').replace(/\n/g, '\r\n')}"`;
+                    const row = [item.id, item.hoTen, item.namSinh, item.soHoSo, item.donVi, item.chiDinh, ketQua];
+                    csvContent += row.join(",") + "\r\n";
+                });
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                
+                link.setAttribute("download", `X-Quang_${selectedDate}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            // --- Logic phím Enter ---
+            inputs.forEach((input, index) => {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        } else {
+                            btnSubmit.focus(); 
+                        }
+                    }
+                });
+            });
+            
+            ketQuaKhac.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.shiftKey) {
+                    return;
+                }
+                if (e.key === 'Enter') {
+                     e.preventDefault(); 
+                     btnSubmit.click(); 
+                }
+            });
+
+            // --- Tải ứng dụng ---
+            async function initializeApp() {
+                // Đặt ngày làm việc là "hôm nay"
+                datePicker.value = getTodayString();
+
+                // Thêm sự kiện cho date picker
+                datePicker.addEventListener('change', async () => {
+                    await renderTable(); // Tải lại bảng theo ngày mới
+                });
+
+                // Tải bảng lần đầu
+                await renderTable();
+
+                if (!WEB_APP_URL.includes('DÁN_URL_MỚI_CỦA_BẠN')) {
+                    showStatus('Sẵn sàng làm việc cho ngày ' + datePicker.value, false);
+                }
+            }
+            
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
+

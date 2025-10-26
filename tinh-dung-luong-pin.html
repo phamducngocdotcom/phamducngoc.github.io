@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Tính Dung Lượng Pin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Soothing Teal and Gray -->
+    <!-- Application Structure Plan: Ứng dụng được cấu trúc thành một công cụ tương tác duy nhất, ưu tiên nhiệm vụ chính của người dùng: tính toán. Giao diện được chia thành hai phần chính: một thẻ máy tính nổi bật ở trên cùng và các phần thông tin giải thích có thể thu gọn bên dưới. Máy tính sử dụng các tab ("Tính theo Công suất" và "Chuyển đổi đơn vị") để phân tách rõ ràng hai phương pháp tính toán khác nhau được đề cập trong bài viết nguồn, giảm sự lộn xộn và hướng dẫn người dùng. Các phần thông tin sử dụng cấu trúc accordion để cung cấp bối cảnh và định nghĩa theo yêu cầu mà không làm choáng ngợp giao diện ban đầu. Cấu trúc này được chọn vì nó chuyển đổi hiệu quả một bài viết thông tin thành một công cụ định hướng nhiệm vụ, giúp người dùng dễ dàng nhận được câu trả lời nhanh chóng trong khi vẫn có thể truy cập vào các giải thích sâu hơn nếu cần. -->
+    <!-- Visualization & Content Choices: Report Info -> Mục tiêu chính là tính toán dung lượng pin dựa trên các thông số đầu vào khác nhau. Presentation Method -> Thay vì biểu đồ, "trực quan hóa" chính là việc hiển thị kết quả số được cập nhật theo thời gian thực. Dữ liệu được tổ chức trong một giao diện thẻ sạch sẽ với các trường nhập liệu rõ ràng và đầu ra được làm nổi bật. Interaction -> Người dùng nhập giá trị vào các trường đầu vào và kết quả (Wh, mAh, Ah) được tự động tính toán và hiển thị ngay lập tức nhờ các trình xử lý sự kiện 'oninput'. Các tab cho phép người dùng chuyển đổi giữa các ngữ cảnh tính toán, trong khi các accordion cho phép hiển thị hoặc ẩn nội dung giải thích. Justification -> Cập nhật theo thời gian thực mang lại phản hồi ngay lập tức, nâng cao trải nghiệm người dùng. Các tab và accordion là các mẫu UI tiêu chuẩn giúp tổ chức thông tin hiệu quả, làm cho công cụ trở nên trực quan hơn so với việc trình bày tất cả thông tin cùng một lúc như trong bài viết gốc. Library/Method -> Vanilla JavaScript để xử lý tất cả logic và tương tác. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .calculator-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease-in-out;
+        }
+        .tab {
+            transition: all 0.2s ease-in-out;
+        }
+        .tab.active {
+            color: #14b8a6;
+            border-bottom-color: #14b8a6;
+        }
+        .tab:not(.active) {
+            border-bottom-color: transparent;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-header svg {
+            transition: transform 0.3s ease-out;
+        }
+        .result-box {
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-600 mb-2">Công Cụ Tính Dung Lượng Pin</h1>
+            <p class="text-slate-600 max-w-2xl mx-auto">Nhập các thông số của bạn để tính toán nhanh dung lượng pin cần thiết theo Watt-giờ (Wh), milliamp-giờ (mAh) và Amp-giờ (Ah).</p>
+        </header>
+
+        <div class="calculator-card max-w-2xl mx-auto p-6 md:p-8">
+            <div class="border-b border-slate-200 mb-6">
+                <nav class="-mb-px flex space-x-6" id="tabs">
+                    <button id="tab1" class="tab active py-4 px-1 border-b-2 font-medium text-sm md:text-base">Tính theo Công suất & Thời gian</button>
+                    <button id="tab2" class="tab py-4 px-1 border-b-2 font-medium text-sm md:text-base text-slate-500 hover:text-teal-600">Chuyển đổi Đơn vị</button>
+                </nav>
+            </div>
+
+            <div id="calculatorContent">
+                <!-- Calculator 1: By Power Consumption -->
+                <div id="calc1">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="power" class="block text-sm font-medium text-slate-700">Công suất thiết bị (Watts)</label>
+                            <input type="number" id="power" placeholder="ví dụ: 15" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+                        </div>
+                        <div>
+                            <label for="runtime" class="block text-sm font-medium text-slate-700">Thời gian chạy mong muốn (Giờ)</label>
+                            <input type="number" id="runtime" placeholder="ví dụ: 5" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label for="voltage1" class="block text-sm font-medium text-slate-700">Điện áp pin (Volts)</label>
+                        <input type="number" id="voltage1" placeholder="ví dụ: 3.7" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+                    </div>
+                </div>
+
+                <!-- Calculator 2: Unit Conversion -->
+                <div id="calc2" class="hidden">
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="capacity" class="block text-sm font-medium text-slate-700">Dung lượng pin (mAh)</label>
+                            <input type="number" id="capacity" placeholder="ví dụ: 10000" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+                        </div>
+                        <div>
+                            <label for="voltage2" class="block text-sm font-medium text-slate-700">Điện áp pin (Volts)</label>
+                            <input type="number" id="voltage2" placeholder="ví dụ: 3.7" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-slate-200">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">Kết quả tính toán</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="result-box p-4 rounded-lg">
+                        <p class="text-sm text-slate-500">Watt-giờ</p>
+                        <p id="resultWh" class="text-2xl font-bold text-teal-600">0 Wh</p>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <p class="text-sm text-slate-500">milliamp-giờ</p>
+                        <p id="resultMah" class="text-2xl font-bold text-teal-600">0 mAh</p>
+                    </div>
+                    <div class="result-box p-4 rounded-lg">
+                        <p class="text-sm text-slate-500">Amp-giờ</p>
+                        <p id="resultAh" class="text-2xl font-bold text-teal-600">0 Ah</p>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-6 flex justify-end">
+                <button id="resetButton" class="text-sm font-medium text-slate-500 hover:text-teal-600 transition">Xóa tất cả</button>
+            </div>
+        </div>
+
+        <section class="max-w-3xl mx-auto mt-12 md:mt-16">
+            <h2 class="text-2xl font-bold text-center mb-6">Thông tin & Giải thích</h2>
+            <div class="space-y-4">
+                <div class="accordion-item bg-white border border-slate-200 rounded-lg">
+                    <button class="accordion-header w-full flex justify-between items-center text-left p-4 font-medium">
+                        <span>Giải thích các đơn vị (Wh, mAh, Ah)</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content px-4 pb-4 text-slate-600">
+                        <ul class="space-y-2 list-disc pl-5">
+                            <li><strong>Watt-giờ (Wh):</strong> Đây là thước đo dung lượng năng lượng. Nó cho bạn biết pin có thể cung cấp bao nhiêu Watt năng lượng trong một giờ. Đây là cách tốt nhất để so sánh các loại pin khác nhau vì nó tính đến cả dung lượng và điện áp.</li>
+                            <li><strong>milliamp-giờ (mAh):</strong> Đây là thước đo dung lượng điện tích. Nó cho bạn biết pin có thể cung cấp bao nhiêu milliamp (mA) dòng điện trong một giờ. 1000 mAh tương đương 1 Ah.</li>
+                            <li><strong>Amp-giờ (Ah):</strong> Tương tự như mAh nhưng là đơn vị lớn hơn. Một pin 5 Ah có thể cung cấp 5 Amps trong một giờ.</li>
+                            <li><strong>Điện áp (V):</strong> Đây là "áp suất" điện từ một nguồn năng lượng. Điện áp của pin ảnh hưởng đến tổng năng lượng mà nó có thể lưu trữ.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white border border-slate-200 rounded-lg">
+                    <button class="accordion-header w-full flex justify-between items-center text-left p-4 font-medium">
+                        <span>Công suất tiêu thụ tham khảo của một số thiết bị</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content px-4 pb-4">
+                        <p class="text-slate-600 mb-4">Dưới đây là công suất tiêu thụ trung bình của một số thiết bị phổ biến để bạn tham khảo khi tính toán.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-slate-500">
+                                <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">Thiết bị</th>
+                                        <th scope="col" class="px-6 py-3">Công suất (Watts)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-white border-b">
+                                        <td class="px-6 py-4 font-medium text-slate-900">Điện thoại thông minh (sạc)</td>
+                                        <td class="px-6 py-4">5 - 18 W</td>
+                                    </tr>
+                                    <tr class="bg-slate-50 border-b">
+                                        <td class="px-6 py-4 font-medium text-slate-900">Laptop (sạc/sử dụng)</td>
+                                        <td class="px-6 py-4">45 - 100 W</td>
+                                    </tr>
+                                    <tr class="bg-white border-b">
+                                        <td class="px-6 py-4 font-medium text-slate-900">Đèn LED cắm trại</td>
+                                        <td class="px-6 py-4">3 - 10 W</td>
+                                    </tr>
+                                     <tr class="bg-slate-50">
+                                        <td class="px-6 py-4 font-medium text-slate-900">Flycam (Drone)</td>
+                                        <td class="px-6 py-4">40 - 80 W</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = {
+                tab1: document.getElementById('tab1'),
+                tab2: document.getElementById('tab2'),
+            };
+
+            const calculators = {
+                calc1: document.getElementById('calc1'),
+                calc2: document.getElementById('calc2'),
+            };
+
+            const inputs = {
+                power: document.getElementById('power'),
+                runtime: document.getElementById('runtime'),
+                voltage1: document.getElementById('voltage1'),
+                capacity: document.getElementById('capacity'),
+                voltage2: document.getElementById('voltage2'),
+            };
+
+            const results = {
+                wh: document.getElementById('resultWh'),
+                mah: document.getElementById('resultMah'),
+                ah: document.getElementById('resultAh'),
+            };
+            
+            const resetButton = document.getElementById('resetButton');
+
+            let activeTab = 'tab1';
+
+            function calculate() {
+                let wh = 0, mah = 0, ah = 0, voltage = 0;
+
+                if (activeTab === 'tab1') {
+                    const powerVal = parseFloat(inputs.power.value) || 0;
+                    const runtimeVal = parseFloat(inputs.runtime.value) || 0;
+                    voltage = parseFloat(inputs.voltage1.value) || 0;
+
+                    wh = powerVal * runtimeVal;
+                    if (voltage > 0) {
+                        mah = (wh / voltage) * 1000;
+                    }
+                } else {
+                    const capacityVal = parseFloat(inputs.capacity.value) || 0;
+                    voltage = parseFloat(inputs.voltage2.value) || 0;
+                    
+                    mah = capacityVal;
+                    if (voltage > 0) {
+                        wh = (mah / 1000) * voltage;
+                    }
+                }
+
+                ah = mah / 1000;
+                
+                updateResults(wh, mah, ah);
+            }
+            
+            function updateResults(wh, mah, ah) {
+                results.wh.textContent = `${wh.toFixed(2)} Wh`;
+                results.mah.textContent = `${mah.toFixed(0)} mAh`;
+                results.ah.textContent = `${ah.toFixed(2)} Ah`;
+            }
+
+            function switchTab(tabId) {
+                activeTab = tabId;
+                
+                Object.values(tabs).forEach(tab => tab.classList.remove('active', 'text-teal-600'));
+                Object.values(tabs).forEach(tab => tab.classList.add('text-slate-500'));
+                
+                Object.values(calculators).forEach(calc => calc.classList.add('hidden'));
+
+                tabs[tabId].classList.add('active', 'text-teal-600');
+                tabs[tabId].classList.remove('text-slate-500');
+                calculators[tabId.replace('tab', 'calc')].classList.remove('hidden');
+                
+                calculate();
+            }
+            
+            function resetAll() {
+                 Object.values(inputs).forEach(input => input.value = '');
+                 calculate();
+            }
+
+            Object.values(inputs).forEach(input => {
+                input.addEventListener('input', calculate);
+            });
+            
+            resetButton.addEventListener('click', resetAll);
+
+            tabs.tab1.addEventListener('click', () => switchTab('tab1'));
+            tabs.tab2.addEventListener('click', () => switchTab('tab2'));
+            
+            const accordions = document.querySelectorAll('.accordion-item');
+            accordions.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = header.querySelector('svg');
+
+                header.addEventListener('click', () => {
+                    const isOpened = content.style.maxHeight && content.style.maxHeight !== '0px';
+                    
+                    accordions.forEach(otherItem => {
+                        const otherContent = otherItem.querySelector('.accordion-content');
+                        const otherIcon = otherItem.querySelector('.accordion-header svg');
+                        if (otherItem !== item) {
+                            otherContent.style.maxHeight = '0px';
+                            otherIcon.style.transform = 'rotate(0deg)';
+                        }
+                    });
+
+                    if (isOpened) {
+                        content.style.maxHeight = '0px';
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            calculate();
+        });
+    </script>
+
+</body>
+</html>

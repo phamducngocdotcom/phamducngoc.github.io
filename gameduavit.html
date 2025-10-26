@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò Chơi Đua Vịt - phamducngoc.com</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            background: #f0f9ff;
+        }
+        .racetrack {
+            background: #38bdf8;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .lane {
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.5);
+        }
+        .lane:last-child {
+            border-bottom: none;
+        }
+
+        /* --- Hoạt ảnh cho vịt --- */
+        @keyframes bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-4deg); }
+            75% { transform: rotate(4deg); }
+        }
+
+        .duck {
+            font-size: 3rem;
+            line-height: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            /* Áp dụng hoạt ảnh mặc định (lúc chờ) */
+            animation: bob 2s ease-in-out infinite, wobble 1.5s ease-in-out infinite;
+        }
+
+        /* Khi cuộc đua bắt đầu, hoạt ảnh sẽ nhanh hơn */
+        .racetrack.racing .duck {
+            animation-duration: 0.4s, 0.3s;
+        }
+        /* --- Kết thúc hoạt ảnh cho vịt --- */
+
+        .finish-line {
+            position: absolute;
+            top: 0;
+            right: 10%;
+            bottom: 0;
+            width: 10px;
+            background-image: repeating-linear-gradient(
+                white 0, white 20px,
+                red 20px, red 40px
+            );
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        @keyframes pop-in {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .winner-modal {
+            animation: pop-in 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-blue-50 text-gray-800 flex flex-col items-center min-h-screen">
+
+    <div class="w-full flex justify-center py-4 bg-blue-50">
+        <a href="https://phamducngoc.com" target="_blank" rel="noopener noreferrer" title="Truy cập phamducngoc.com">
+            <img src="https://phamducngoc.com/wp-content/uploads/2025/08/pham-duc-ngoc.png" alt="Logo Pham Duc Ngoc" class="h-16 w-auto transition-transform hover:scale-105">
+        </a>
+    </div>
+
+    <div class="w-full bg-white/80 backdrop-blur-sm p-4 rounded-b-xl shadow-lg border-b border-gray-200 z-10">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-3xl font-bold text-center text-yellow-500 mb-3" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">🏁 Bảng Điều Khiển Đua Vịt 🏁</h1>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div class="md:col-span-1">
+                    <label for="nameInput" class="block mb-1 font-semibold text-gray-600">Thêm tên:</label>
+                    <textarea id="nameInput" class="w-full h-24 p-2 border border-gray-300 rounded-md shadow-inner focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Vịt Vàng&#10;Vịt Xanh&#10;..."></textarea>
+                </div>
+                <div class="md:col-span-1">
+                    <label for="timeInput" class="block mb-1 font-semibold text-gray-600">Thời gian cuộc đua (giây):</label>
+                    <input type="number" id="timeInput" value="30" min="5" max="300" class="w-full p-2 border border-gray-300 rounded-md shadow-inner focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <div class="md:col-span-1 flex flex-col items-center">
+                    <button id="updateDucksButton" class="w-full max-w-xs px-6 py-3 bg-blue-500 text-white font-bold text-lg rounded-lg shadow-md hover:bg-blue-600 active:bg-blue-700 transform hover:scale-105 transition-transform duration-200">
+                        Tạo Vịt Đua
+                    </button>
+                    <p id="duckCount" class="text-center mt-2 text-gray-600 font-medium">Số vịt: 0</p>
+                </div>
+                <div class="md:col-span-1 flex justify-center space-x-2">
+                    <button id="startButton" class="flex-1 px-4 py-3 bg-green-500 text-white font-bold text-xl rounded-lg shadow-lg hover:bg-green-600 active:bg-green-700 transform hover:scale-105 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100" disabled>
+                        Bắt Đầu
+                    </button>
+                    <button id="resetButton" class="flex-1 px-4 py-3 bg-red-500 text-white font-bold text-xl rounded-lg shadow-lg hover:bg-red-600 active:bg-red-700 transform hover:scale-105 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100" disabled>
+                        Chơi Lại
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full flex-1 p-4">
+        <div id="racetrack" class="racetrack w-full h-full rounded-lg shadow-2xl border-8 border-yellow-300 flex flex-col p-4 justify-center items-center">
+            <div id="initialMessage" class="text-center text-white text-2xl font-bold">
+                <p>🦆 Thêm tên và cài đặt thời gian để bắt đầu! 🦆</p>
+            </div>
+            <div class="finish-line"></div>
+        </div>
+    </div>
+
+
+    <div id="winnerModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+        <div class="winner-modal bg-white rounded-2xl shadow-xl p-8 text-center">
+            <h2 class="text-5xl font-bold mb-4" id="winnerText"></h2>
+            <p class="text-9xl mb-6" id="winnerEmoji">🏆</p>
+            <button id="playAgainButton" class="px-8 py-3 bg-blue-500 text-white font-bold text-xl rounded-lg shadow-md hover:bg-blue-600 transform hover:scale-105 transition-transform duration-200">
+                Chơi Lại
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const racetrack = document.getElementById('racetrack');
+        const startButton = document.getElementById('startButton');
+        const resetButton = document.getElementById('resetButton');
+        const winnerModal = document.getElementById('winnerModal');
+        const winnerText = document.getElementById('winnerText');
+        const playAgainButton = document.getElementById('playAgainButton');
+        const nameInput = document.getElementById('nameInput');
+        const timeInput = document.getElementById('timeInput');
+        const updateDucksButton = document.getElementById('updateDucksButton');
+        const duckCount = document.getElementById('duckCount');
+        const initialMessage = document.getElementById('initialMessage');
+
+        const MAX_DUCKS = 200;
+
+        let ducks = [];
+        let isRacing = false;
+        let animationFrameId;
+        let winner = null;
+        let lastTimestamp = 0;
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function updateDucks() {
+            if (isRacing) return;
+            
+            initialMessage.style.display = 'none';
+            racetrack.innerHTML = '<div class="finish-line"></div>'; 
+            ducks = [];
+
+            const names = nameInput.value.split('\n')
+                .map(name => name.trim())
+                .filter(name => name !== '')
+                .slice(0, MAX_DUCKS);
+
+            if (names.length === 0) {
+                duckCount.textContent = 'Số vịt: 0';
+                startButton.disabled = true;
+                resetButton.disabled = true;
+                initialMessage.style.display = 'block';
+                return;
+            }
+
+            names.forEach((name, i) => {
+                const lane = document.createElement('div');
+                lane.className = 'lane flex-1 flex items-center';
+
+                const duckContainer = document.createElement('div');
+                duckContainer.className = 'flex items-center';
+                
+                const duckElement = document.createElement('div');
+                duckElement.className = 'duck';
+                duckElement.textContent = '🦆';
+                duckElement.style.color = getRandomColor();
+
+                // Tạo độ trễ hoạt ảnh ngẫu nhiên để các vịt không di chuyển đồng bộ
+                duckElement.style.animationDelay = `${-Math.random() * 2}s, ${-Math.random() * 2}s`;
+
+
+                const duckLabel = document.createElement('span');
+                duckLabel.className = 'ml-2 font-bold text-white';
+                duckLabel.textContent = name;
+                duckLabel.style.fontSize = 'clamp(0.75rem, 2vh, 1.125rem)';
+                duckLabel.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+
+                duckContainer.appendChild(duckElement);
+                duckContainer.appendChild(duckLabel);
+                lane.appendChild(duckContainer);
+                racetrack.appendChild(lane);
+
+                ducks.push({
+                    id: i,
+                    name: name,
+                    element: duckContainer, // Giờ ta di chuyển cả container
+                    position: 0,
+                    speed: 0 
+                });
+            });
+
+            duckCount.textContent = `Số vịt: ${ducks.length}`;
+            resetGame(); 
+        }
+
+
+        function raceLoop(timestamp) {
+            if (!isRacing) return;
+
+            if (lastTimestamp === 0) {
+                lastTimestamp = timestamp;
+            }
+            const deltaTime = (timestamp - lastTimestamp) / 1000; // Thời gian trôi qua tính bằng giây
+            lastTimestamp = timestamp;
+
+            const finishLinePosition = racetrack.clientWidth * 0.90 - 50;
+
+            for (const duck of ducks) {
+                if (winner) break;
+
+                const moveAmount = duck.speed * deltaTime;
+                duck.position += moveAmount + (Math.random() * moveAmount * 0.1);
+                
+                duck.element.style.transform = `translateX(${duck.position}px)`;
+
+                if (duck.position >= finishLinePosition) {
+                    winner = duck;
+                    endRace(winner);
+                    break;
+                }
+            }
+
+            if (!winner) {
+                animationFrameId = requestAnimationFrame(raceLoop);
+            }
+        }
+
+        function startRace() {
+            if (isRacing || ducks.length === 0) return;
+            
+            isRacing = true;
+            winner = null;
+            lastTimestamp = 0;
+            
+            racetrack.classList.add('racing');
+
+            startButton.disabled = true;
+            resetButton.disabled = false;
+            updateDucksButton.disabled = true;
+            nameInput.disabled = true;
+            timeInput.disabled = true;
+
+            let raceDuration = parseInt(timeInput.value, 10);
+            if (isNaN(raceDuration) || raceDuration < 5) {
+                raceDuration = 5;
+            }
+            const finishLinePosition = racetrack.clientWidth * 0.90 - 50;
+            const averageSpeedPerSecond = finishLinePosition / raceDuration;
+
+            ducks.forEach(duck => {
+                const speedVariation = 0.85 + Math.random() * 0.30;
+                duck.speed = averageSpeedPerSecond * speedVariation;
+            });
+            
+            const maxSpeed = Math.max(...ducks.map(d => d.speed));
+            if (maxSpeed < averageSpeedPerSecond) {
+                const fastestDuck = ducks.find(d => d.speed === maxSpeed);
+                fastestDuck.speed = averageSpeedPerSecond * 1.05;
+            }
+
+            animationFrameId = requestAnimationFrame(raceLoop);
+        }
+
+        function endRace(winningDuck) {
+            isRacing = false;
+            cancelAnimationFrame(animationFrameId);
+            winnerText.textContent = `${winningDuck.name} Thắng Cuộc!`;
+            winnerModal.classList.remove('hidden');
+            resetButton.disabled = false;
+            racetrack.classList.remove('racing');
+        }
+
+        function resetGame() {
+            isRacing = false;
+            winner = null;
+            cancelAnimationFrame(animationFrameId);
+            racetrack.classList.remove('racing');
+
+            ducks.forEach(duck => {
+                duck.position = 0;
+                duck.speed = 0;
+                duck.element.style.transform = `translateX(0px)`;
+            });
+            
+            startButton.disabled = ducks.length === 0;
+            resetButton.disabled = true;
+            updateDucksButton.disabled = false;
+            nameInput.disabled = false;
+            timeInput.disabled = false;
+            
+            winnerModal.classList.add('hidden');
+        }
+
+        updateDucksButton.addEventListener('click', updateDucks);
+        startButton.addEventListener('click', startRace);
+        resetButton.addEventListener('click', resetGame);
+        playAgainButton.addEventListener('click', () => {
+             winnerModal.classList.add('hidden');
+             resetGame();
+        });
+        
+        window.addEventListener('resize', () => {
+           if (ducks.length > 0) {
+               updateDucks();
+           }
+        });
+
+    </script>
+</body>
+</html>
