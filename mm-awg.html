@@ -1,0 +1,218 @@
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Tính Cỡ Dây Dẫn</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+        #calculator-container {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: auto;
+        }
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+       .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+       .length-group {
+            display: flex;
+            gap: 10px;
+        }
+       .length-group input {
+            flex: 3;
+        }
+       .length-group select {
+            flex: 1;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-left: 5px solid #007bff;
+            border-radius: 4px;
+        }
+        #results h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+        #results p {
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+        #results strong {
+            color: #d9534f;
+        }
+        #error-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="calculator-container">
+    <h2>Công Cụ Tính Cỡ Dây Dẫn (AWG)</h2>
+    
+    <div class="input-group">
+        <label for="current">Dòng điện (Ampe)</label>
+        <input type="number" id="current" placeholder="ví dụ: 25" value="25">
+    </div>
+
+    <div class="input-group">
+        <label for="voltage">Điện áp hệ thống (Volt)</label>
+        <input type="number" id="voltage" placeholder="ví dụ: 12" value="12">
+    </div>
+
+    <div class="input-group">
+        <label for="length">Chiều dài một chiều của mạch</label>
+        <div class="length-group">
+            <input type="number" id="length" placeholder="ví dụ: 5" value="5">
+            <select id="lengthUnit">
+                <option value="meters" selected>mét</option>
+                <option value="feet">feet</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="voltageDrop">Sụt áp mong muốn (%)</label>
+        <input type="number" id="voltageDrop" placeholder="ví dụ: 3" value="3">
+    </div>
+
+    <div class="input-group">
+        <label for="material">Vật liệu dây dẫn</label>
+        <select id="material">
+            <option value="copper" selected>Đồng (Copper)</option>
+            <option value="aluminum">Nhôm (Aluminum)</option>
+        </select>
+    </div>
+
+    <button onclick="calculateAWG()">Tính Toán</button>
+
+    <div id="results">
+        <h3>Kết Quả:</h3>
+        <p>Tiết diện yêu cầu (CM): <strong id="cmResult">-</strong></p>
+        <p>Cỡ dây AWG đề xuất: <strong id="awgResult">-</strong></p>
+        <div id="error-message"></div>
+    </div>
+</div>
+
+<script>
+    function calculateAWG() {
+        // 1. Lấy dữ liệu đầu vào
+        const current = parseFloat(document.getElementById('current').value);
+        const voltage = parseFloat(document.getElementById('voltage').value);
+        let length = parseFloat(document.getElementById('length').value);
+        const lengthUnit = document.getElementById('lengthUnit').value;
+        const voltageDropPercent = parseFloat(document.getElementById('voltageDrop').value);
+        const material = document.getElementById('material').value;
+        const errorMessage = document.getElementById('error-message');
+
+        // 2. Xác thực dữ liệu
+        if (isNaN(current) |
+
+| isNaN(voltage) |
+| isNaN(length) |
+| isNaN(voltageDropPercent) |
+| current <= 0 |
+| voltage <= 0 |
+| length <= 0 |
+| voltageDropPercent <= 0) {
+            errorMessage.textContent = 'Vui lòng nhập đầy đủ và chính xác các giá trị dương.';
+            document.getElementById('cmResult').textContent = '-';
+            document.getElementById('awgResult').textContent = '-';
+            return;
+        }
+        errorMessage.textContent = '';
+
+        // 3. Thiết lập hằng số và tính toán
+        const K_COPPER = 12.9; // Ohm-CM/ft cho đồng
+        const K_ALUMINUM = 21.2; // Ohm-CM/ft cho nhôm
+
+        // Chuyển đổi chiều dài sang feet
+        if (lengthUnit === 'meters') {
+            length *= 3.28084;
+        }
+
+        // Tính chiều dài khứ hồi
+        const roundTripLength = length * 2;
+
+        // Tính sụt áp cho phép bằng Volt
+        const maxVoltageDrop = voltage * (voltageDropPercent / 100);
+
+        // Chọn hằng số K
+        const K = (material === 'copper')? K_COPPER : K_ALUMINUM;
+
+        // Công thức tính Circular Mils (CM)
+        const requiredCM = (K * current * roundTripLength) / maxVoltageDrop;
+
+        // 4. Tìm cỡ dây AWG tương ứng
+        const awgTable = [
+            { awg: "18", cm: 1620 }, { awg: "16", cm: 2580 }, { awg: "14", cm: 4110 },
+            { awg: "12", cm: 6530 }, { awg: "10", cm: 10380 }, { awg: "8", cm: 16510 },
+            { awg: "6", cm: 26240 }, { awg: "4", cm: 41740 }, { awg: "2", cm: 66360 },
+            { awg: "1", cm: 83690 }, { awg: "1/0", cm: 105600 }, { awg: "2/0", cm: 133100 },
+            { awg: "3/0", cm: 167800 }, { awg: "4/0", cm: 211600 }, { awg: "250 kcmil", cm: 250000 },
+            { awg: "300 kcmil", cm: 300000 }, { awg: "350 kcmil", cm: 350000 }, { awg: "400 kcmil", cm: 400000 },
+            { awg: "500 kcmil", cm: 500000 }
+        ];
+
+        let recommendedAWG = "Quá lớn, cần xem xét lại thiết kế";
+        for (const wire of awgTable) {
+            if (wire.cm >= requiredCM) {
+                recommendedAWG = wire.awg;
+                break;
+            }
+        }
+
+        // 5. Hiển thị kết quả
+        document.getElementById('cmResult').textContent = requiredCM.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' CM';
+        document.getElementById('awgResult').textContent = recommendedAWG;
+    }
+</script>
+
+</body>
+</html>
