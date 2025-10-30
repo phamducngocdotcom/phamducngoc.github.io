@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công Cụ Tính Cỡ Dây Dẫn</title>
+    <title>Công Cụ Tính Cỡ Dây Dẫn (AWG ⇄ mm²)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -25,7 +26,7 @@
             padding-bottom: 10px;
             margin-top: 0;
         }
-       .input-group {
+        .input-group {
             margin-bottom: 15px;
         }
         label {
@@ -41,14 +42,14 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-       .length-group {
+        .length-group {
             display: flex;
             gap: 10px;
         }
-       .length-group input {
+        .length-group input {
             flex: 3;
         }
-       .length-group select {
+        .length-group select {
             flex: 1;
         }
         button {
@@ -79,7 +80,7 @@
         }
         #results p {
             margin: 5px 0;
-            font-size: 1.1em;
+            font-size: 1.05em;
         }
         #results strong {
             color: #d9534f;
@@ -94,7 +95,7 @@
 <body>
 
 <div id="calculator-container">
-    <h2>Công Cụ Tính Cỡ Dây Dẫn (AWG)</h2>
+    <h2>Công Cụ Tính Cỡ Dây Dẫn (AWG ⇄ mm²)</h2>
     
     <div class="input-group">
         <label for="current">Dòng điện (Ampe)</label>
@@ -134,84 +135,79 @@
 
     <div id="results">
         <h3>Kết Quả:</h3>
-        <p>Tiết diện yêu cầu (CM): <strong id="cmResult">-</strong></p>
+        <p>Tiết diện yêu cầu: <strong id="cmResult">-</strong></p>
+        <p>Tương đương: <strong id="mm2Result">-</strong></p>
         <p>Cỡ dây AWG đề xuất: <strong id="awgResult">-</strong></p>
         <div id="error-message"></div>
     </div>
 </div>
 
 <script>
-    function calculateAWG() {
-        // 1. Lấy dữ liệu đầu vào
-        const current = parseFloat(document.getElementById('current').value);
-        const voltage = parseFloat(document.getElementById('voltage').value);
-        let length = parseFloat(document.getElementById('length').value);
-        const lengthUnit = document.getElementById('lengthUnit').value;
-        const voltageDropPercent = parseFloat(document.getElementById('voltageDrop').value);
-        const material = document.getElementById('material').value;
-        const errorMessage = document.getElementById('error-message');
+function calculateAWG() {
+    const current = parseFloat(document.getElementById('current').value);
+    const voltage = parseFloat(document.getElementById('voltage').value);
+    let length = parseFloat(document.getElementById('length').value);
+    const lengthUnit = document.getElementById('lengthUnit').value;
+    const voltageDropPercent = parseFloat(document.getElementById('voltageDrop').value);
+    const material = document.getElementById('material').value;
+    const errorMessage = document.getElementById('error-message');
 
-        // 2. Xác thực dữ liệu
-        if (isNaN(current) |
-
-| isNaN(voltage) |
-| isNaN(length) |
-| isNaN(voltageDropPercent) |
-| current <= 0 |
-| voltage <= 0 |
-| length <= 0 |
-| voltageDropPercent <= 0) {
-            errorMessage.textContent = 'Vui lòng nhập đầy đủ và chính xác các giá trị dương.';
-            document.getElementById('cmResult').textContent = '-';
-            document.getElementById('awgResult').textContent = '-';
-            return;
-        }
-        errorMessage.textContent = '';
-
-        // 3. Thiết lập hằng số và tính toán
-        const K_COPPER = 12.9; // Ohm-CM/ft cho đồng
-        const K_ALUMINUM = 21.2; // Ohm-CM/ft cho nhôm
-
-        // Chuyển đổi chiều dài sang feet
-        if (lengthUnit === 'meters') {
-            length *= 3.28084;
-        }
-
-        // Tính chiều dài khứ hồi
-        const roundTripLength = length * 2;
-
-        // Tính sụt áp cho phép bằng Volt
-        const maxVoltageDrop = voltage * (voltageDropPercent / 100);
-
-        // Chọn hằng số K
-        const K = (material === 'copper')? K_COPPER : K_ALUMINUM;
-
-        // Công thức tính Circular Mils (CM)
-        const requiredCM = (K * current * roundTripLength) / maxVoltageDrop;
-
-        // 4. Tìm cỡ dây AWG tương ứng
-        const awgTable = [
-            { awg: "18", cm: 1620 }, { awg: "16", cm: 2580 }, { awg: "14", cm: 4110 },
-            { awg: "12", cm: 6530 }, { awg: "10", cm: 10380 }, { awg: "8", cm: 16510 },
-            { awg: "6", cm: 26240 }, { awg: "4", cm: 41740 }, { awg: "2", cm: 66360 },
-            { awg: "1", cm: 83690 }, { awg: "1/0", cm: 105600 }, { awg: "2/0", cm: 133100 },
-            { awg: "3/0", cm: 167800 }, { awg: "4/0", cm: 211600 }, { awg: "250 kcmil", cm: 250000 },
-            { awg: "300 kcmil", cm: 300000 }, { awg: "350 kcmil", cm: 350000 }, { awg: "400 kcmil", cm: 400000 },
-            { awg: "500 kcmil", cm: 500000 }
-        ];
-
-        let recommendedAWG = "Quá lớn, cần xem xét lại thiết kế";
-        for (const wire of awgTable) {
-            if (wire.cm >= requiredCM) {
-                recommendedAWG = wire.awg;
-                break;
-            }
-        }
-
-        // 5. Hiển thị kết quả
-        document.getElementById('cmResult').textContent = requiredCM.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' CM';
-        document.getElementById('awgResult').textContent = recommendedAWG;
+    if (isNaN(current) || isNaN(voltage) || isNaN(length) || isNaN(voltageDropPercent) ||
+        current <= 0 || voltage <= 0 || length <= 0 || voltageDropPercent <= 0) {
+        errorMessage.textContent = '⚠️ Vui lòng nhập đầy đủ và chính xác các giá trị dương.';
+        document.getElementById('cmResult').textContent = '-';
+        document.getElementById('awgResult').textContent = '-';
+        document.getElementById('mm2Result').textContent = '-';
+        return;
     }
+    errorMessage.textContent = '';
+
+    const K_COPPER = 12.9;
+    const K_ALUMINUM = 21.2;
+    const K = (material === 'copper') ? K_COPPER : K_ALUMINUM;
+
+    if (lengthUnit === 'meters') length *= 3.28084;
+    const roundTripLength = length * 2;
+    const maxVoltageDrop = voltage * (voltageDropPercent / 100);
+    const requiredCM = (K * current * roundTripLength) / maxVoltageDrop;
+
+    // Quy đổi sang mm²: 1 circular mil = 0.0000005067 m² = 0.0005067 mm²
+    const mm2 = requiredCM * 0.0005067;
+
+    const awgTable = [
+        { awg: "18", cm: 1620, mm2: 0.823 },
+        { awg: "16", cm: 2580, mm2: 1.31 },
+        { awg: "14", cm: 4110, mm2: 2.08 },
+        { awg: "12", cm: 6530, mm2: 3.31 },
+        { awg: "10", cm: 10380, mm2: 5.26 },
+        { awg: "8", cm: 16510, mm2: 8.37 },
+        { awg: "6", cm: 26240, mm2: 13.3 },
+        { awg: "4", cm: 41740, mm2: 21.1 },
+        { awg: "2", cm: 66360, mm2: 33.6 },
+        { awg: "1", cm: 83690, mm2: 42.4 },
+        { awg: "1/0", cm: 105600, mm2: 53.5 },
+        { awg: "2/0", cm: 133100, mm2: 67.4 },
+        { awg: "3/0", cm: 167800, mm2: 85.0 },
+        { awg: "4/0", cm: 211600, mm2: 107.2 },
+        { awg: "250 kcmil", cm: 250000, mm2: 127 },
+        { awg: "300 kcmil", cm: 300000, mm2: 152 },
+        { awg: "350 kcmil", cm: 350000, mm2: 177 },
+        { awg: "400 kcmil", cm: 400000, mm2: 203 },
+        { awg: "500 kcmil", cm: 500000, mm2: 253 }
+    ];
+
+    let recommendedAWG = "⚠️ Quá lớn, cần xem xét lại thiết kế hoặc giảm sụt áp.";
+    for (const wire of awgTable) {
+        if (wire.cm >= requiredCM) {
+            recommendedAWG = `${wire.awg} (≈ ${wire.mm2} mm²)`;
+            break;
+        }
+    }
+
+    document.getElementById('cmResult').textContent = requiredCM.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' CM';
+    document.getElementById('mm2Result').textContent = mm2.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' mm²';
+    document.getElementById('awgResult').textContent = recommendedAWG;
+}
 </script>
 
 </body>
