@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chuyển đổi W sang A</title>
+<title>Công cụ chuyển đổi W ↔ A</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -11,7 +11,7 @@
         padding: 20px;
     }
     .container {
-        max-width: 400px;
+        max-width: 420px;
         margin: auto;
         background: white;
         padding: 20px;
@@ -19,12 +19,41 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         text-align: center;
     }
-    .logo {
-        margin-bottom: 15px;
-    }
     .logo img {
         max-width: 120px;
         height: auto;
+        margin-bottom: 10px;
+    }
+    .tabs {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #007bff;
+    }
+    .tab {
+        flex: 1;
+        padding: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        border-radius: 8px 8px 0 0;
+        background: #e9ecef;
+        color: #333;
+        transition: 0.3s;
+    }
+    .tab.active {
+        background: #007bff;
+        color: white;
+    }
+    .tab:hover {
+        background: #0056b3;
+        color: white;
+    }
+    .tab-content {
+        display: none;
+        text-align: left;
+    }
+    .tab-content.active {
+        display: block;
     }
     input {
         width: 100%;
@@ -51,10 +80,12 @@
         margin-top: 15px;
         font-size: 18px;
         font-weight: bold;
+        text-align: center;
     }
     .footer-link {
         margin-top: 20px;
         font-size: 14px;
+        text-align: center;
     }
     .footer-link a {
         color: #007bff;
@@ -74,17 +105,36 @@
         </a>
     </div>
 
-    <h2>Chuyển đổi Watt (W) sang Ampere (A)</h2>
-    
-    <label for="watt">Công suất (W):</label>
-    <input type="number" id="watt" placeholder="Nhập công suất (W)">
-    
-    <label for="volt">Điện áp (V):</label>
-    <input type="number" id="volt" placeholder="Nhập điện áp (V)">
-    
-    <button onclick="convert()">Tính dòng điện (A)</button>
-    
-    <div class="result" id="result"></div>
+    <h2>Công cụ chuyển đổi điện năng</h2>
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('tab1')">W → A</div>
+        <div class="tab" onclick="showTab('tab2')">A → W</div>
+    </div>
+
+    <!-- Tab 1: W sang A -->
+    <div id="tab1" class="tab-content active">
+        <label for="watt1">Công suất (W):</label>
+        <input type="number" id="watt1" placeholder="Nhập công suất (W)">
+        
+        <label for="volt1">Điện áp (V):</label>
+        <input type="number" id="volt1" placeholder="Nhập điện áp (V)">
+        
+        <button onclick="convertToAmp()">Tính dòng điện (A)</button>
+        <div class="result" id="result1"></div>
+    </div>
+
+    <!-- Tab 2: A sang W -->
+    <div id="tab2" class="tab-content">
+        <label for="amp2">Dòng điện (A):</label>
+        <input type="number" id="amp2" placeholder="Nhập dòng điện (A)">
+        
+        <label for="volt2">Điện áp (V):</label>
+        <input type="number" id="volt2" placeholder="Nhập điện áp (V)">
+        
+        <button onclick="convertToWatt()">Tính công suất (W)</button>
+        <div class="result" id="result2"></div>
+    </div>
 
     <div class="footer-link">
         🔗 Tham khảo thêm: 
@@ -95,17 +145,39 @@
 </div>
 
 <script>
-function convert() {
-    let watt = parseFloat(document.getElementById('watt').value);
-    let volt = parseFloat(document.getElementById('volt').value);
-    
+function showTab(tabId) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+
+function convertToAmp() {
+    let watt = parseFloat(document.getElementById('watt1').value);
+    let volt = parseFloat(document.getElementById('volt1').value);
+    let resultBox = document.getElementById('result1');
+
     if (!watt || !volt || volt === 0) {
-        document.getElementById('result').innerHTML = "⚠️ Vui lòng nhập giá trị hợp lệ!";
+        resultBox.innerHTML = "⚠️ Vui lòng nhập công suất (W) và điện áp (V) hợp lệ!";
         return;
     }
 
     let amp = watt / volt;
-    document.getElementById('result').innerHTML = `🔌 Dòng điện: <b>${amp.toFixed(3)} A</b>`;
+    resultBox.innerHTML = `🔌 Dòng điện: <b>${amp.toFixed(3)} A</b>`;
+}
+
+function convertToWatt() {
+    let amp = parseFloat(document.getElementById('amp2').value);
+    let volt = parseFloat(document.getElementById('volt2').value);
+    let resultBox = document.getElementById('result2');
+
+    if (!amp || !volt || volt === 0) {
+        resultBox.innerHTML = "⚠️ Vui lòng nhập dòng điện (A) và điện áp (V) hợp lệ!";
+        return;
+    }
+
+    let watt = amp * volt;
+    resultBox.innerHTML = `⚡ Công suất: <b>${watt.toFixed(2)} W</b>`;
 }
 </script>
 </body>
