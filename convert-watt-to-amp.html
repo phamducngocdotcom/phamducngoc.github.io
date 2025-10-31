@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chuyển đổi W sang A</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        padding: 20px;
+    }
+    .container {
+        max-width: 400px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .logo {
+        margin-bottom: 15px;
+    }
+    .logo img {
+        max-width: 120px;
+        height: auto;
+    }
+    input {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+    }
+    button {
+        width: 100%;
+        padding: 10px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #0056b3;
+    }
+    .result {
+        margin-top: 15px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .footer-link {
+        margin-top: 20px;
+        font-size: 14px;
+    }
+    .footer-link a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .footer-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">
+        <a href="https://phamducngoc.com" target="_blank" rel="noopener noreferrer">
+            <img src="https://phamducngoc.com/wp-content/uploads/2025/08/pham-duc-ngoc.png" alt="Pham Duc Ngoc Logo">
+        </a>
+    </div>
+
+    <h2>Chuyển đổi Watt (W) sang Ampere (A)</h2>
+    
+    <label for="watt">Công suất (W):</label>
+    <input type="number" id="watt" placeholder="Nhập công suất (W)">
+    
+    <label for="volt">Điện áp (V):</label>
+    <input type="number" id="volt" placeholder="Nhập điện áp (V)">
+    
+    <button onclick="convert()">Tính dòng điện (A)</button>
+    
+    <div class="result" id="result"></div>
+
+    <div class="footer-link">
+        🔗 Tham khảo thêm: 
+        <a href="https://phamducngoc.com/awg-mm-dc/" target="_blank" rel="noopener noreferrer">
+            Cỡ dây AWG chuẩn DC cho năng lượng mặt trời
+        </a>
+    </div>
+</div>
+
+<script>
+function convert() {
+    let watt = parseFloat(document.getElementById('watt').value);
+    let volt = parseFloat(document.getElementById('volt').value);
+    
+    if (!watt || !volt || volt === 0) {
+        document.getElementById('result').innerHTML = "⚠️ Vui lòng nhập giá trị hợp lệ!";
+        return;
+    }
+
+    let amp = watt / volt;
+    document.getElementById('result').innerHTML = `🔌 Dòng điện: <b>${amp.toFixed(3)} A</b>`;
+}
+</script>
+</body>
+</html>
