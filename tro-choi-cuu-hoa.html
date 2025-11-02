@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bé Học Cứu Hỏa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f9ff;
+        }
+        .img-style {
+            max-width: 100%;
+            max-height: 224px; 
+            object-fit: contain; 
+            border-radius: 0.5rem; 
+        }
+        .feedback-img-style {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            border-radius: 0.5rem; 
+        }
+        .css-cross {
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+        .cross-line {
+            position: absolute;
+            width: 120px;
+            height: 20px;
+            background: #ef4444; /* red-500 */
+            top: 40px;
+            left: -10px;
+            border-radius: 5px;
+        }
+        .cross-line.one { transform: rotate(45deg); }
+        .cross-line.two { transform: rotate(-45deg); }
+        #fireworks-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            opacity: 1;
+            transition: all 1s cubic-bezier(0.19, 1, 0.22, 1); 
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body class="bg-blue-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="relative w-full max-w-2xl">
+        
+        <div id="start-screen" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-30 flex flex-col items-center justify-center rounded-2xl p-8 text-center">
+            <h1 class="text-5xl font-bold text-red-600 mb-6">Bé Học Cứu Hỏa</h1>
+            <div class="draw-container">
+                <style>
+                    .css-firetruck-start { width: 180px; height: 100px; background-color: #ef4444; border-radius: 10px; position: relative; }
+                    .css-firetruck-start::before { content: ''; position: absolute; width: 60px; height: 70px; background-color: #ef4444; left: -20px; bottom: 0; border-radius: 10px 0 0 10px; border: 4px solid #dc2626; }
+                    .css-firetruck-start::after { content: ''; position: absolute; width: 40px; height: 40px; background-color: #93c5fd; left: -10px; bottom: 20px; border-radius: 5px; }
+                    .wheel-start { position: absolute; width: 40px; height: 40px; background-color: #1f2937; border-radius: 50%; bottom: -20px; }
+                    .wheel-start.front { left: -15px; } .wheel-start.back { right: 20px; }
+                    .ladder-start { position: absolute; width: 100px; height: 10px; background: #9ca3af; top: -20px; left: 30px; transform: rotate(-5deg); border: 2px solid #6b7280; }
+                </style>
+                <div class="css-firetruck-start">
+                    <div class="wheel-start front"></div>
+                    <div class="wheel-start back"></div>
+                    <div class="ladder-start"></div>
+                </div>
+            </div>
+            <button id="start-btn" class="mt-8 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-12 text-3xl rounded-xl shadow-lg transform transition-transform hover:scale-105">
+                Bắt đầu!
+            </button>
+        </div>
+
+        <div id="game-container" class="hidden relative bg-white rounded-2xl shadow-2xl p-8 pt-6 w-full text-center">
+            
+            <div id="fireworks-container"></div>
+
+            <h2 class="text-3xl font-bold text-blue-700 mb-2">Câu hỏi</h2>
+
+            <div id="image-container" class="w-full h-56 flex items-center justify-center mb-4 bg-gray-100 rounded-lg">
+                </div>
+            
+            <p id="question-text" class="text-2xl md:text-3xl text-gray-800 font-semibold mb-6 min-h-[100px]">
+                ...
+            </p>
+            
+            <div id="button-container" class="h-20 flex justify-center items-center">
+                <button id="start-timer-btn" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-12 text-3xl rounded-xl shadow-lg transform transition-transform hover:scale-105">
+                    5s suy nghĩ
+                </button>
+                
+                <div id="timer-text" class="hidden text-6xl font-bold text-red-500">5</div>
+                
+                <button id="show-answer-btn" class="hidden bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-12 text-3xl rounded-xl shadow-lg transform transition-transform hover:scale-105">
+                    Xem Đáp Án
+                </button>
+            </div>
+            
+            <div id="feedback-modal" class="hidden absolute inset-0 bg-white/95 z-20 flex flex-col items-center justify-center rounded-2xl p-8">
+                <div id="feedback-icon" class="w-24 h-24 mb-4">
+                    </div>
+                <p id="answer-text" class="text-3xl font-bold mb-6"></p>
+                <button id="next-btn" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 text-2xl rounded-lg shadow-md">
+                    Câu tiếp
+                </button>
+            </div>
+        </div>
+        
+        <div id="game-over-screen" class="hidden bg-white rounded-2xl shadow-2xl p-8 w-full text-center">
+            <h2 class="text-4xl font-bold text-green-600 mb-4">Hoàn thành!</h2>
+            <p id="score-text" class="text-3xl text-gray-700 mb-8">
+                Bé đã xem xong 4 câu hỏi!
+            </p>
+            <button id="restart-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-12 text-3xl rounded-xl shadow-lg transform transition-transform hover:scale-105">
+                Chơi lại
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ----- DOM Elements -----
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        const gameContainer = document.getElementById('game-container');
+        const timerText = document.getElementById('timer-text');
+        const imageContainer = document.getElementById('image-container');
+        const questionText = document.getElementById('question-text');
+        const showAnswerBtn = document.getElementById('show-answer-btn');
+        const feedbackModal = document.getElementById('feedback-modal');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const answerText = document.getElementById('answer-text');
+        const nextBtn = document.getElementById('next-btn');
+        const fireworksContainer = document.getElementById('fireworks-container');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const scoreText = document.getElementById('score-text');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        // MỚI: Thêm nút bắt đầu đếm giờ
+        const startTimerBtn = document.getElementById('start-timer-btn');
+
+        // ----- Âm thanh (Tone.js) (ĐÃ THÊM) -----
+        let correctSound, wrongSound, tickSound; // Thêm tickSound
+
+        function setupSounds() {
+            correctSound = new Tone.Synth({
+                oscillator: { type: 'sine' },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.2 }
+            }).toDestination();
+            
+            wrongSound = new Tone.Synth().toDestination();
+
+            // MỚI: Âm thanh đếm ngược
+            tickSound = new Tone.Synth({
+                oscillator: { type: 'sine' },
+                frequency: 880, // Nốt A5, cao và ngắn
+                envelope: { attack: 0.005, decay: 0.05, sustain: 0, release: 0.1 }
+            }).toDestination();
+        }
+        
+        // ----- Hình minh họa (ĐÃ THAY ĐỔI) -----
+        const illustrations = {
+            q1: `<img src="https://cellphones.com.vn/sforum/wp-content/uploads/2023/09/115-la-so-dien-thoai-gi-2.jpg" alt="Số điện thoại cứu hỏa" class="img-style" onerror="this.alt='Không tìm thấy ảnh hinh-cau-1.png'; this.src='';">`,
+            q2: `<img src="https://raw.githubusercontent.com/phamducngocdotcom/phamducngoc.github.io/refs/heads/main/istockphoto-940247446-1024x1024.jpg" alt="Nguyên nhân gây cháy" class="img-style" onerror="this.alt='Không tìm thấy ảnh hinh-cau-2.png'; this.src='';">`,
+            q3: `<img src="https://raw.githubusercontent.com/phamducngocdotcom/phamducngoc.github.io/refs/heads/main/thang-may-hoat-hinh.jpg" alt="Không dùng thang máy khi cháy" class="img-style" onerror="this.alt='Không tìm thấy ảnh hinh-cau-3.png'; this.src='';">`,
+            q4: `<img src="https://raw.githubusercontent.com/phamducngocdotcom/phamducngoc.github.io/refs/heads/main/ky-nang-thoat-hiem-cho-be-3.png" alt="Bò thấp khi thoát hiểm" class="img-style" onerror="this.alt='Không tìm thấy ảnh hinh-cau-4.png'; this.src='';">`
+        };
+
+        // Biểu tượng Đúng/Sai (ĐÃ THAY ĐỔI)
+        const feedbackIcons = {
+            correct: `<img src="https://i.pinimg.com/736x/71/ed/f9/71edf94b77cf25f956af7303d1087d98.jpg" alt="Đúng" class="feedback-img-style">`,
+            wrong: `<div class="css-cross">
+                        <div class="cross-line one"></div>
+                        <div class="cross-line two"></div>
+                       </div>`
+        };
+
+        // ----- Dữ liệu câu hỏi -----
+        const questions = [
+            {
+                text: "Số điện thoại cứu hỏa 115 là đúng hay sai?",
+                answer: false, // 114 mới đúng
+                image: illustrations.q1
+            },
+            {
+                text: "Nguyên nhân gây hỏa hoạn là do điện, quên tắt bếp ga, nghịch lửa, hút thuốc lá vất tàn bừa bãi là đúng hay sai?",
+                answer: true,
+                image: illustrations.q2
+            },
+            {
+                text: "Khi hỏa hoạn thì có thể thoát hiểm bằng thang máy đúng hay sai?",
+                answer: false,
+                image: illustrations.q3
+            },
+            {
+                text: "Khi thoát hiểm phải lấy khăn ẩm che mũi, miệng và cúi thấp người bò sát mặt đất ra ngoài đúng hay sai?",
+                answer: true,
+                image: illustrations.q4
+            }
+        ];
+
+        // ----- Trạng thái trò chơi -----
+        let currentQuestionIndex = 0;
+        let timerInterval; 
+        let timeLeft = 5;
+
+        // ----- Chức năng trò chơi -----
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            gameContainer.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            feedbackModal.classList.add('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endGame();
+                return;
+            }
+            
+            const q = questions[currentQuestionIndex];
+            questionText.textContent = q.text;
+            imageContainer.innerHTML = q.image; 
+            
+            nextBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "Xem kết quả" : "Câu tiếp";
+            
+            feedbackModal.classList.add('hidden');
+            showAnswerBtn.classList.add('hidden'); 
+            timerText.classList.add('hidden'); // Ẩn đồng hồ
+            
+            // MỚI: Hiển thị nút "5s suy nghĩ"
+            startTimerBtn.classList.remove('hidden');
+            
+            // XÓA: Không tự động bắt đầu timer
+            // startTimer(); 
+        }
+
+        // ĐÃ THAY ĐỔI: Chức năng startTimer
+        function startTimer() {
+            // Ẩn nút "5s suy nghĩ" và hiển thị đồng hồ
+            startTimerBtn.classList.add('hidden');
+            timerText.classList.remove('hidden');
+
+            timeLeft = 5;
+            timerText.textContent = timeLeft;
+            
+            // MỚI: Phát âm thanh cho giây đầu tiên (số 5)
+            if (tickSound) tickSound.triggerAttackRelease("A5", "32n", Tone.now());
+
+            clearInterval(timerInterval); 
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerText.textContent = timeLeft;
+
+                // MỚI: Phát âm thanh cho các giây còn lại (4, 3, 2, 1)
+                if (timeLeft > 0 && tickSound) {
+                    tickSound.triggerAttackRelease("A5", "32n", Tone.now());
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerText.classList.add('hidden');
+                    showAnswerBtn.classList.remove('hidden');
+                }
+            }, 1000);
+        }
+        
+        function showAnswer() {
+            showAnswerBtn.classList.add('hidden');
+            feedbackModal.classList.remove('hidden');
+
+            const q = questions[currentQuestionIndex];
+            const correctAnswer = q.answer;
+
+            if (correctAnswer === true) {
+                feedbackIcon.innerHTML = feedbackIcons.correct;
+                answerText.innerHTML = "Đáp án là: <span class='text-green-500'>ĐÚNG</span>";
+                const now = Tone.now();
+                if(correctSound) {
+                    correctSound.triggerAttackRelease("C5", "16n", now);
+                    correctSound.triggerAttackRelease("E5", "16n", now + 0.1);
+                    correctSound.triggerAttackRelease("G5", "16n", now + 0.2);
+                    correctSound.triggerAttackRelease("C6", "16n", now + 0.3);
+                }
+                triggerFireworks();
+            } else {
+                feedbackIcon.innerHTML = feedbackIcons.wrong;
+                answerText.innerHTML = "Đáp án là: <span class='text-red-500'>SAI</span>";
+                if(wrongSound) {
+                    wrongSound.triggerAttackRelease("C#3", "8n", Tone.now());
+                    wrongSound.triggerAttackRelease("C3", "8n", Tone.now() + 0.2);
+                }
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function endGame() {
+            gameContainer.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            scoreText.textContent = "Bé đã xem xong 4 câu hỏi!";
+        }
+        
+        function triggerFireworks() {
+            fireworksContainer.innerHTML = '';
+            const colors = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e'];
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                const x = (Math.random() - 0.5) * 500;
+                const y = (Math.random() - 0.5) * 500;
+                
+                fireworksContainer.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.style.transform = `translate(${x}px, ${y}px) scale(0)`;
+                    particle.style.opacity = 0;
+                }, 10);
+
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 1010);
+            }
+        }
+
+        // ----- Event Listeners -----
+        startBtn.addEventListener('click', () => {
+            Tone.start();
+            setupSounds();
+            startScreen.classList.add('hidden');
+            startGame();
+        });
+
+        // MỚI: Thêm listener cho nút "5s suy nghĩ"
+        startTimerBtn.addEventListener('click', startTimer);
+
+        showAnswerBtn.addEventListener('click', showAnswer);
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', startGame);
+
+    </script>
+</body>
+</html>
