@@ -1,6 +1,6 @@
-<!-- Chosen Palette: Calm Harmony (Weather-app standard blue/white) -->
-<!-- Application Structure Plan: A two-section, single-column dashboard. Section 1 (Current Weather) provides immediate, at-a-glance information. Section 2 (Hourly Forecast) provides near-term planning info. This structure directly mimics the user's provided screenshots, which represent a clear, established, and user-friendly UX pattern for weather applications. -->
-<!-- Visualization & Content Choices: Report Info (User Screenshots) -> Goal: Inform/Plan -> Viz: Current Weather (Large text, icon, details grid), Hourly Forecast (Horizontal scrolling cards) -> Interaction: Scroll -> Justification: Directly matches user's visual request and is the standard, most effective way to present this data. -> Library: Vanilla JS + OpenWeatherMap icon URLs. Replaced "UV Index" (unavailable on free API) with "Visibility" (available) to ensure user's API key works. -->
+<!-- Chosen Palette: Calm Harmony (Orange Theme) -->
+<!-- Application Structure Plan: Three-section dashboard (Current, Hourly, Daily) with a branded header. Added rain volume (mm) to all three sections per user request. Replaced 'Pressure' with 'Rain (1h)' in the current grid to maintain layout balance. -->
+<!-- Visualization & Content Choices: Report Info (Weather data + Rain request) -> Goal: Inform/Plan -> Viz: Standard weather UI + Logo + Rain (mm) data. -> Interaction: Scroll, Link -> Justs: Fulfills user request for 'mưa' (rain volume) by adding .rain['1h'] and .rain['3h'] data from OWM API. -> Library: Vanilla JS. -->
 <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <!DOCTYPE html>
 <html lang="vi">
@@ -13,7 +13,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #f3f4f6; /* Nền vẫn giữ màu xám nhạt */
         }
         .hourly-forecast-container::-webkit-scrollbar {
             display: none;
@@ -30,7 +30,7 @@
         }
         .detail-item .label {
             font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.8); /* Giữ màu trắng cho label chi tiết */
             display: flex;
             align-items: center;
         }
@@ -48,7 +48,7 @@
 <body class="p-4">
 
     <div id="loading" class="text-center p-10">
-        <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-blue-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-orange-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
@@ -57,10 +57,19 @@
 
     <div id="weather-app" class="max-w-2xl mx-auto hidden">
         
-        <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-2xl shadow-xl p-6 md:p-8">
-            <div>
-                <h1 id="city-name" class="text-3xl font-bold">Thời tiết Hải Phòng</h1>
-                <p id="current-time" class="text-sm opacity-80">Cập nhật lúc 15:00</p>
+        <div class="bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-2xl shadow-xl p-6 md:p-8">
+            <div class="flex justify-between items-start space-x-4">
+                <div>
+                    <h1 id="city-name" class="text-3xl font-bold">Thời tiết Hải Phòng</h1>
+                    <p id="current-time" class="text-sm opacity-80">Cập nhật lúc 15:00</p>
+                </div>
+                <!-- LOGO VÀ LINK ĐƯỢC THÊM VÀO -->
+                <a href="https://phamducngoc.com" target="_blank" rel="noopener noreferrer" class="flex-shrink-0">
+                    <img src="https://phamducngoc.com/wp-content/uploads/2025/08/pham-duc-ngoc.png" 
+                         alt="Logo Phạm Đức Ngọc" 
+                         class="w-20 h-auto rounded-lg shadow-sm"
+                         onerror="this.style.display='none'">
+                </a>
             </div>
 
             <div class="flex flex-col md:flex-row items-center justify-between mt-6">
@@ -85,9 +94,10 @@
                     <span class="label"><span class="icon-label">💧</span>Độ ẩm</span>
                     <span id="current-humidity" class="value">75%</span>
                 </div>
+                <!-- THAY THẾ KHÍ ÁP BẰNG LƯỢNG MƯA -->
                 <div class="detail-item">
-                    <span class="label"><span class="icon-label">🌀</span>Khí áp</span>
-                    <span id="current-pressure" class="value">1010 hPa</span>
+                    <span class="label"><span class="icon-label">🌧️</span>Lượng mưa (1h)</span>
+                    <span id="current-rain" class="value">0.0 mm</span>
                 </div>
                 <div class="detail-item">
                     <span class="label"><span class="icon-label">👁️</span>Tầm nhìn</span>
@@ -107,7 +117,15 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Thời tiết các giờ tới</h2>
             <div id="hourly-forecast-container" class="flex overflow-x-auto space-x-4 pb-2">
+                <!-- Dữ liệu giờ sẽ được chèn vào đây bằng JS -->
             </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Dự báo các ngày tới</h2>
+            <ul id="daily-forecast-container" class="space-y-2">
+                <!-- Dữ liệu hàng ngày sẽ được chèn vào đây bằng JS -->
+            </ul>
         </div>
 
     </div>
@@ -143,6 +161,7 @@
             .then(([currentData, forecastData]) => {
                 updateCurrentWeather(currentData);
                 updateHourlyForecast(forecastData);
+                updateDailyForecast(forecastData); 
                 
                 loadingEl.style.display = 'none';
                 appEl.style.display = 'block';
@@ -168,7 +187,11 @@
             document.getElementById('current-feels-like').textContent = `Cảm giác như ${Math.round(data.main.feels_like)}°C`;
             document.getElementById('current-wind').textContent = `${(data.wind.speed * 3.6).toFixed(1)} km/h ${getWindDirection(data.wind.deg)}`;
             document.getElementById('current-humidity').textContent = `${data.main.humidity}%`;
-            document.getElementById('current-pressure').textContent = `${data.main.pressure} hPa`;
+            
+            // CẬP NHẬT LƯỢNG MƯA (1 GIỜ)
+            const rain1h = (data.rain && data.rain['1h']) ? data.rain['1h'] : 0;
+            document.getElementById('current-rain').textContent = `${rain1h.toFixed(1)} mm`;
+            
             document.getElementById('current-visibility').textContent = `${(data.visibility / 1000).toFixed(1)} km`;
             document.getElementById('current-sunrise').textContent = formatTime(data.sys.sunrise);
             document.getElementById('current-sunset').textContent = formatTime(data.sys.sunset);
@@ -185,6 +208,9 @@
                 const iconUrl = `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`;
                 const temp = Math.round(item.main.temp);
                 const pop = Math.round(item.pop * 100);
+                
+                // LẤY LƯỢNG MƯA (3 GIỜ)
+                const rainVolume = (item.rain && item.rain['3h']) ? item.rain['3h'].toFixed(1) : '0.0';
 
                 const cardHtml = `
                     <div class="flex-shrink-0 w-24 text-center p-2 bg-gray-50 rounded-lg shadow-sm">
@@ -192,7 +218,91 @@
                         <img src="${iconUrl}" alt="${item.weather[0].description}" class="mx-auto w-12 h-12">
                         <p class="font-bold text-lg text-gray-900">${temp}°</p>
                         <p class="text-xs text-blue-500 font-medium">${pop}% 💧</p>
+                        <p class="text-xs text-gray-700 mt-0.5">${rainVolume} mm</p>
                     </div>
+                `;
+                container.innerHTML += cardHtml;
+            });
+        }
+
+        function updateDailyForecast(data) {
+            const container = document.getElementById('daily-forecast-container');
+            container.innerHTML = '';
+
+            const dailyData = {};
+
+            data.list.forEach(item => {
+                const date = item.dt_txt.split(' ')[0];
+
+                if (!dailyData[date]) {
+                    dailyData[date] = {
+                        minTemp: item.main.temp_min,
+                        maxTemp: item.main.temp_max,
+                        pops: [],
+                        icons: {},
+                        descriptions: {},
+                        rainVolumes: [] // Thêm mảng để chứa lượng mưa
+                    };
+                }
+
+                dailyData[date].minTemp = Math.min(dailyData[date].minTemp, item.main.temp_min);
+                dailyData[date].maxTemp = Math.max(dailyData[date].maxTemp, item.main.temp_max);
+                
+                dailyData[date].pops.push(item.pop);
+                
+                // THÊM LƯỢNG MƯA
+                if (item.rain && item.rain['3h']) {
+                    dailyData[date].rainVolumes.push(item.rain['3h']);
+                }
+                
+                const hour = item.dt_txt.split(' ')[1].substring(0, 2);
+                dailyData[date].icons[hour] = item.weather[0].icon;
+                dailyData[date].descriptions[hour] = item.weather[0].description;
+            });
+
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            Object.keys(dailyData).forEach(dateStr => {
+                if (dateStr === todayStr) {
+                    return;
+                }
+
+                const day = dailyData[dateStr];
+                const dateObj = new Date(dateStr + 'T12:00:00');
+
+                const dayName = formatDay(dateObj);
+                const dateString = `${dateObj.getDate()}/${dateObj.getMonth() + 1}`;
+                
+                // --- SỬA LỖI: BỔ SUNG CODE BỊ THIẾU ---
+                // Lấy icon và mô tả đại diện (ưu tiên 12:00 hoặc 15:00)
+                const repIcon = day.icons['12'] || day.icons['15'] || Object.values(day.icons)[0] || '01d';
+                const repDesc = day.descriptions['12'] || day.descriptions['15'] || Object.values(day.descriptions)[0] || 'Không rõ';
+                const iconUrl = `https://openweathermap.org/img/wn/${repIcon}@2x.png`;
+                // --- KẾT THÚC SỬA LỖI ---
+                
+                // TÍNH TỔNG LƯỢNG MƯA TRONG NGÀY
+                const totalRain = day.rainVolumes.reduce((a, b) => a + b, 0);
+                
+                // --- SỬA LỖI: BỔ SUNG LẠI maxPop ---
+                const maxPop = Math.round(Math.max(...day.pops) * 100);
+                // --- KẾT THÚC SỬA LỖI ---
+
+                const tempMin = Math.round(day.minTemp);
+                const tempMax = Math.round(day.maxTemp);
+
+                const cardHtml = `
+                    <li class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2 shadow-sm">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-base font-bold text-gray-900">${dayName}</p>
+                            <p class="text-sm text-gray-600">${dateString} - ${repDesc.charAt(0).toUpperCase() + repDesc.slice(1)}</p>
+                        </div>
+                        <img src="${iconUrl}" alt="${repDesc}" class="w-10 h-10 mx-2">
+                        <div class="text-right w-20">
+                            <p class="text-base font-bold text-gray-900">${tempMax}° / ${tempMin}°</p>
+                            <p class="text-xs text-blue-500 font-medium">${maxPop}% 💧</p>
+                            <p class="text-xs text-gray-700 mt-0.5">${totalRain.toFixed(1)} mm</p>
+                        </div>
+                    </li>
                 `;
                 container.innerHTML += cardHtml;
             });
@@ -200,6 +310,11 @@
 
         function formatTime(timestamp) {
             return new Date(timestamp * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDay(date) {
+            const dayNames = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+            return dayNames[date.getDay()];
         }
 
         function getWindDirection(deg) {
