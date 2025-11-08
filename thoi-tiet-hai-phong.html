@@ -417,6 +417,18 @@
         setTimeout(sendHeight, 1000);
         setTimeout(sendHeight, 3000);
     </script>
+<script>
+// Gửi chiều cao thực của trang ra ngoài iframe (sang WordPress)
+function sendHeight() {
+  const height = document.body.scrollHeight;
+  parent.postMessage({ height: height }, '*');
+}
 
+// Gửi khi mới load
+window.addEventListener('load', sendHeight);
+
+// Gửi lại khi thay đổi kích thước hoặc dữ liệu thời tiết cập nhật
+setInterval(sendHeight, 800);
+</script>
 </body>
 </html>
