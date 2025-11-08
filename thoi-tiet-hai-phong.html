@@ -1,6 +1,6 @@
 <!-- Chosen Palette: Apple Weather (Dynamic) -->
-<!-- Application Structure Plan: Standalone HTML page. Enhanced Apple Weather UI. -->
-<!-- Visualization & Content Choices: API: Open-Meteo (added 'is_day' parameter). Logic: Major JS enhancements. 1) Added background gradients object (`backgrounds`). 2) `updateCurrentWeather` now selects a dynamic background based on weather code and `is_day`. 3) `updateDailyForecast` now calculates and renders a horizontal temperature bar (`temp-bar-thumb`) showing each day's temp range relative to the weekly range. CSS: Added styles for `.temp-bar-track` and `.temp-bar-thumb`. Refined glassmorphism (`rgba`, `blur`) and typography (font weights) for a more premium "đẹp hơn" feel per user request. -->
+<!-- Application Structure Plan: Standalone HTML page. Enhanced Apple Weather UI with PWA support. -->
+<!-- Visualization & Content Choices: Added <link rel="manifest"> and <meta name="theme-color"> to the <head> to enable Progressive Web App features (Add to Home Screen). All other HTML, CSS (dynamic bg), and JS (Open-Meteo, temp bar) logic remains the same as the previous "Pro" version. -->
 <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <!DOCTYPE html>
 <html lang="vi">
@@ -8,6 +8,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thời tiết (Phong cách Apple Pro)</title>
+    
+    <!-- (MỚI) KHAI BÁO PWA (Progressive Web App) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a4e9b">
     
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -314,6 +318,7 @@
             $('current-feels-like').textContent = `${Math.round(current.apparent_temperature)}°`;
             $('current-humidity').textContent = `${current.relative_humidity_2m}%`;
             $('current-wind-speed').textContent = `${current.wind_speed_10m.toFixed(1)}`;
+            // FIX: Đổi 'getDirection' thành 'getWindDirection'
             $('current-wind-dir').textContent = `Hướng ${getWindDirection(current.wind_direction_10m)}`;
             $('current-rain').textContent = `${current.precipitation.toFixed(1)} mm`;
 
