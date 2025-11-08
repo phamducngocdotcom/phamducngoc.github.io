@@ -1,7 +1,7 @@
 {
   "name": "Thời tiết Hải Phòng",
   "short_name": "Thời tiết",
-  "description": "Ứng dụng thời tiết phong cách Apple",
+  "description": "Ứng dụng thời tiết dành riêng cho khu vực Hải Phòng",
   "start_url": "https://phamducngoc.com/thoi-tiet-hai-phong/",
   "display": "standalone",
   "background_color": "#0a4e9b",
