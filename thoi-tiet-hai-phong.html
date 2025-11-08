@@ -1,6 +1,6 @@
 <!-- Chosen Palette: Apple Weather (Dynamic) -->
-<!-- Application Structure Plan: Standalone HTML page. Enhanced Apple Weather UI with PWA support. -->
-<!-- Visualization & Content Choices: Added <link rel="manifest"> and <meta name="theme-color"> to the <head> to enable Progressive Web App features (Add to Home Screen). All other HTML, CSS (dynamic bg), and JS (Open-Meteo, temp bar) logic remains the same as the previous "Pro" version. -->
+<!-- Application Structure Plan: Standalone HTML page. Enhanced Apple Weather UI with PWA support and iframe embedding script. -->
+<!-- Visualization & Content Choices: Includes <link rel="manifest"> for PWA. Includes the 'sendHeight()' script before </body> for seamless iframe embedding. Fixed the 'getDirection' bug (now 'getWindDirection'). All other Apple UI logic remains. -->
 <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <!DOCTYPE html>
 <html lang="vi">
@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thời tiết (Phong cách Apple Pro)</title>
     
-    <!-- (MỚI) KHAI BÁO PWA (Progressive Web App) -->
+    <!-- KHAI BÁO PWA (Progressive Web App) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a4e9b">
     
@@ -33,14 +33,15 @@
             padding: 1.5rem 0.5rem;
             /* Thêm hiệu ứng chuyển nền mượt mà */
             transition: background-image 1s ease-in-out;
+            margin: 0; /* Đảm bảo không có margin cho iframe */
         }
         
         /* Tinh chỉnh thẻ "Kính mờ" */
         .glass-card {
-            background-color: rgba(255, 255, 255, 0.12); /* Giảm độ sáng 1 chút */
-            backdrop-filter: blur(20px); /* Tăng độ mờ */
+            background-color: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.18); /* Tăng viền rõ hơn 1 chút */
+            border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 20px;
             padding: 1rem 1.25rem;
             margin-bottom: 1rem;
@@ -61,7 +62,7 @@
             border-bottom: none;
         }
 
-        /* THANH NHIỆT ĐỘ (MỚI) */
+        /* THANH NHIỆT ĐỘ */
         .temp-bar-track {
             width: 100%;
             height: 4px;
@@ -74,7 +75,6 @@
             height: 100%;
             border-radius: 2px;
             position: absolute;
-            /* Màu gradient cho thanh nhiệt độ */
             background-image: linear-gradient(to right, #4ade80, #facc15, #f97316);
         }
 
@@ -97,7 +97,6 @@
         <!-- THẺ THÔNG TIN CHÍNH -->
         <div class="text-center mb-4 pt-4">
             <h1 id="city-name" class="text-3xl font-medium">Hải Phòng</h1>
-            <!-- Tinh chỉnh Typography -->
             <p id="current-temp" class="text-8xl font-thin tracking-tight my-1">30°</p>
             <p id="current-desc" class="text-2xl font-regular text-gray-200">Trời quang</p>
             <p id="current-high-low" class="text-xl font-medium mt-1">Cao: 32° / Thấp: 25°</p>
@@ -122,44 +121,32 @@
         
         <!-- THẺ CHI TIẾT (GRID) -->
         <div class="grid grid-cols-2 gap-4">
-            <!-- Cảm giác như -->
             <div class="glass-card !mb-0">
                 <h2 class="text-xs text-gray-300 font-medium uppercase tracking-wider mb-2">Cảm giác như</h2>
                 <p id="current-feels-like" class="text-4xl font-light">35°</p>
             </div>
-            
-            <!-- Độ ẩm -->
             <div class="glass-card !mb-0">
                 <h2 class="text-xs text-gray-300 font-medium uppercase tracking-wider mb-2">Độ ẩm</h2>
                 <p id="current-humidity" class="text-4xl font-light">75<span class="text-2xl">%</span></p>
             </div>
-
-            <!-- Gió -->
             <div class="glass-card !mb-0">
                 <h2 class="text-xs text-gray-300 font-medium uppercase tracking-wider mb-2">Gió</h2>
                 <p id="current-wind-speed" class="text-2xl font-light">10 <span class="text-lg">km/h</span></p>
                 <p id="current-wind-dir" class="text-xl font-light">Hướng B</p>
             </div>
-            
-            <!-- Lượng mưa (1h) -->
             <div class="glass-card !mb-0">
                 <h2 class="text-xs text-gray-300 font-medium uppercase tracking-wider mb-2">Lượng mưa (1h)</h2>
                 <p id="current-rain" class="text-2xl font-light">0.0 <span class="text-lg">mm</span></p>
             </div>
-
-            <!-- Mặt trời mọc -->
             <div class="glass-card !mb-0">
                 <h2 class="text-xs text-gray-300 font-medium uppercase tracking-wider mb-2">Mặt trời mọc</h2>
                 <p id="current-sunrise" class="text-4xl font-light">05:30</p>
             </div>
-            
-            <!-- Mặt trời lặn -->
             <div class="glass-card !mb-0">
                 <h2 class="text-xs text-gray-300 font-medium uppercase tracking-wider mb-2">Mặt trời lặn</h2>
                 <p id="current-sunset" class="text-4xl font-light">18:15</p>
             </div>
         </div>
-        
     </div>
 
     <!-- Toàn bộ JavaScript logic -->
@@ -191,7 +178,7 @@
             }
         }
         
-        // (MỚI) DANH SÁCH NỀN ĐỘNG
+        // DANH SÁCH NỀN ĐỘNG
         const backgrounds = {
             day_clear: 'linear-gradient(170deg, #4a90e2 0%, #0a4e9b 70%, #05264c 100%), radial-gradient(circle at 50% -20%, rgba(255, 255, 230, 0.3), rgba(255, 255, 230, 0) 50%)',
             night_clear: 'linear-gradient(170deg, #0d1a2a 0%, #0a2a4c 70%, #000 100%), radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 20%)',
@@ -199,7 +186,7 @@
             rain: 'linear-gradient(170deg, #5c6a79 0%, #3e4852 70%, #2a3036 100%)'
         };
 
-        // --- BẢN ĐỒ DỊCH THỜI TIẾT (WMO) ---
+        // BẢN ĐỒ DỊCH THỜI TIẾT (WMO)
         function getWeatherInfo(code) {
             const map = {
                 0: { desc: 'Trời quang', icon: '☀️', category: 'clear' },
@@ -234,12 +221,14 @@
             return map[code] || { desc: 'Không rõ', icon: '🤷', category: 'cloudy' };
         }
 
+        // HÀM LẤY HƯỚNG GIÓ
         function getWindDirection(deg) {
             const directions = ['B', 'BĐB', 'ĐB', 'ĐĐB', 'Đ', 'ĐĐN', 'ĐN', 'NĐN', 'N', 'NĐN', 'TN', 'TNN', 'T', 'TBB', 'TB', 'BTT'];
             const index = Math.round((deg % 360) / 22.5);
             return directions[index % 16];
         }
 
+        // CÁC HÀM ĐỊNH DẠNG THỜI GIAN
         function formatTime(dateString) {
             const date = new Date(dateString);
             return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
@@ -262,7 +251,6 @@
             const lon = 106.6881;
             const timezone = 'Asia/Ho_Chi_Minh';
             
-            // THÊM 'is_day' VÀO API CALL
             const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=is_day,temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max&timezone=${timezone}`;
 
             const loadingEl = $('loading');
@@ -294,6 +282,7 @@
             });
         }
 
+        // HÀM CẬP NHẬT GIAO DIỆN CHÍNH
         function updateCurrentWeather(data) {
             const { current, daily } = data;
             const weather = getWeatherInfo(current.weather_code);
@@ -318,18 +307,17 @@
             $('current-feels-like').textContent = `${Math.round(current.apparent_temperature)}°`;
             $('current-humidity').textContent = `${current.relative_humidity_2m}%`;
             $('current-wind-speed').textContent = `${current.wind_speed_10m.toFixed(1)}`;
-            // FIX: Đổi 'getDirection' thành 'getWindDirection'
-            $('current-wind-dir').textContent = `Hướng ${getWindDirection(current.wind_direction_10m)}`;
+            $('current-wind-dir').textContent = `Hướng ${getWindDirection(current.wind_direction_10m)}`; // ĐÃ SỬA LỖI
             $('current-rain').textContent = `${current.precipitation.toFixed(1)} mm`;
 
             $('current-sunrise').textContent = formatTime(daily.sunrise[0]);
             $('current-sunset').textContent = formatTime(daily.sunset[0]);
         }
 
+        // HÀM CẬP NHẬT GIỜ
         function updateHourlyForecast(data) {
             const container = $('hourly-forecast-container');
             container.innerHTML = '';
-
             const { hourly } = data;
             const now = new Date();
             
@@ -337,13 +325,12 @@
             if (currentHourIndex === -1) currentHourIndex = 0; 
             if (currentHourIndex > 0) currentHourIndex--; 
 
-            // Lấy 8 giờ tiếp theo
             const next8Hours = hourly.time.slice(currentHourIndex, currentHourIndex + 8);
 
             next8Hours.forEach((timeStr, index) => {
                 const i = currentHourIndex + index;
                 const weather = getWeatherInfo(hourly.weather_code[i]);
-                const time = formatHour(timeStr); // Định dạng HH:mm
+                const time = formatHour(timeStr);
                 const temp = Math.round(hourly.temperature_2m[i]);
 
                 const cardHtml = `
@@ -357,20 +344,18 @@
             });
         }
 
+        // HÀM CẬP NHẬT NGÀY
         function updateDailyForecast(data) {
             const container = $('daily-forecast-container');
             container.innerHTML = '';
             const { daily } = data;
 
-            // Tính toán dải nhiệt độ CẢ TUẦN để làm thanh trượt
             const weekMin = Math.min(...daily.temperature_2m_min);
             const weekMax = Math.max(...daily.temperature_2m_max);
             const weekRange = weekMax - weekMin;
 
-            // Bỏ qua ngày hôm nay (index 0), lấy 5 ngày tiếp theo
             daily.time.slice(1, 6).forEach((dateStr, index) => {
-                const i = index + 1; // +1 để bỏ qua hôm nay
-                
+                const i = index + 1;
                 const weather = getWeatherInfo(daily.weather_code[i]);
                 const dayName = (i === 1) ? 'Ngày mai' : formatDay(dateStr);
                 
@@ -378,10 +363,9 @@
                 const tempMin = Math.round(daily.temperature_2m_min[i]);
                 const pop = daily.precipitation_probability_max[i];
 
-                // Tính toán % cho thanh nhiệt độ
                 let leftPercent = 0;
                 let widthPercent = 100;
-                if (weekRange > 0) { // Tránh chia cho 0
+                if (weekRange > 0) {
                     leftPercent = ((tempMin - weekMin) / weekRange) * 100;
                     widthPercent = ((tempMax - tempMin) / weekRange) * 100;
                 }
@@ -397,7 +381,6 @@
 
                         <div class="w-1/3 text-right font-medium flex items-center justify-end">
                             <span class="text-base text-gray-300">${tempMin}°</span>
-                            <!-- THANH NHIỆT ĐỘ MỚI -->
                             <div class="temp-bar-track mx-2 flex-1">
                                 <div class="temp-bar-thumb" style="margin-left: ${leftPercent}%; width: ${widthPercent}%;"></div>
                             </div>
@@ -409,5 +392,31 @@
             });
         }
     </script>
+
+    <!-- SCRIPT GỬI CHIỀU CAO CHO WORDPRESS (PARENT) -->
+    <script>
+        function sendHeight() {
+            try {
+                var height = document.body.scrollHeight;
+                window.parent.postMessage({ height: height }, '*');
+            } catch(e) {
+                console.warn('Không thể gửi chiều cao cho parent:', e);
+            }
+        }
+        window.addEventListener('load', sendHeight);
+        try {
+            let resizeTimer;
+            const resizeObserver = new ResizeObserver(() => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(sendHeight, 150);
+            });
+            resizeObserver.observe(document.body);
+        } catch(e) {
+            setInterval(sendHeight, 1000);
+        }
+        setTimeout(sendHeight, 1000);
+        setTimeout(sendHeight, 3000);
+    </script>
+
 </body>
 </html>
