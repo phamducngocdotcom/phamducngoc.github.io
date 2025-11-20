@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo Cận Lâm Sàng - BV Công An Hải Phòng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: white;
+            color: #333;
+        }
+
+        /* Cấu hình in ấn */
+        @media print {
+            @page { margin: 1cm; size: A4; }
+            body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none !important; }
+            .page-break { page-break-before: always; }
+            .chart-container { page-break-inside: avoid; height: 300px !important; width: 100% !important; }
+            h2 { break-after: avoid; }
+            table { break-inside: auto; }
+            tr { break-inside: avoid; }
+        }
+
+        /* Style bảng biểu */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 12pt;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 4px 6px;
+            text-align: center;
+        }
+        th {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        td.text-left { text-align: left; }
+        
+        .section-header {
+            font-size: 15pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 2px solid #333;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            color: #B45309; /* Màu cam đậm cho tiêu đề */
+        }
+
+        .chart-box {
+            position: relative;
+            height: 320px;
+            width: 100%;
+            margin-bottom: 25px;
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body class="max-w-[210mm] mx-auto p-6">
+
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-6 text-center">
+        <div class="w-1/2">
+            <p class="font-bold uppercase text-sm">BỆNH VIỆN CÔNG AN TP. HẢI PHÒNG</p>
+            <p class="font-bold text-sm">KHOA CẬN LÂM SÀNG</p>
+            <hr class="w-1/3 mx-auto border-black mt-1">
+        </div>
+        <div class="w-1/2">
+            <p class="font-bold uppercase text-sm">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+            <p class="font-bold underline text-sm">Độc lập - Tự do - Hạnh phúc</p>
+        </div>
+    </div>
+
+    <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold uppercase mb-1">BÁO CÁO HOẠT ĐỘNG CẬN LÂM SÀNG</h1>
+        <p class="italic text-sm">Số liệu so sánh 2024 - 2025 (Cập nhật đến 14/11)</p>
+    </div>
+
+    <!-- 1. TỔNG HỢP -->
+    <div class="mb-8">
+        <h2 class="section-header">I. SỐ LIỆU TỔNG QUÁT</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th class="text-left">Bộ phận</th>
+                    <th>Tổng 2024</th>
+                    <th>Tổng 2025</th>
+                    <th>Biến động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-left">1. Xét Nghiệm (Mẫu)</td>
+                    <td>24.581</td>
+                    <td>28.075</td>
+                    <td>+ 3.494</td>
+                </tr>
+                <tr>
+                    <td class="text-left">2. X-Quang (Ca)</td>
+                    <td>8.414</td>
+                    <td>7.567</td>
+                    <td>- 847</td>
+                </tr>
+                <tr>
+                    <td class="text-left">3. Siêu Âm (Ca)</td>
+                    <td>8.786</td>
+                    <td>6.938</td>
+                    <td>- 1.848</td>
+                </tr>
+                <tr>
+                    <td class="text-left">4. Điện Tim (Ca)</td>
+                    <td>7.860</td>
+                    <td>7.793</td>
+                    <td>- 67</td>
+                </tr>
+                <tr class="font-bold bg-orange-50">
+                    <td class="text-left">TỔNG CỘNG</td>
+                    <td>49.641</td>
+                    <td>50.373</td>
+                    <td>+ 732</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 2. XÉT NGHIỆM -->
+    <div class="page-break">
+        <h2 class="section-header">II. XÉT NGHIỆM</h2>
+        <p class="mb-2 italic text-sm">Biểu đồ so sánh số lượng mẫu xét nghiệm theo tháng</p>
+        <div class="chart-box">
+            <canvas id="chartLab"></canvas>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="text-left">Khoản mục</th>
+                    <th>Sinh Hóa</th>
+                    <th>Huyết Học</th>
+                    <th>Nước Tiểu</th>
+                    <th>Tổng cộng</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-left">Năm 2024</td>
+                    <td>9.533</td>
+                    <td>7.997</td>
+                    <td>7.051</td>
+                    <td class="font-bold">24.581</td>
+                </tr>
+                <tr>
+                    <td class="text-left">Năm 2025</td>
+                    <td>11.317</td>
+                    <td>8.569</td>
+                    <td>8.189</td>
+                    <td class="font-bold">28.075</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 3. X-QUANG -->
+    <div class="page-break">
+        <h2 class="section-header">III. X-QUANG</h2>
+        <p class="mb-2 italic text-sm">Biểu đồ so sánh số lượng ca chụp X-Quang theo tháng</p>
+        <div class="chart-box">
+            <canvas id="chartXray"></canvas>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="text-left">Nhóm</th>
+                    <th>SKĐK</th>
+                    <th>TD-TS-TQ</th>
+                    <th>Khác</th>
+                    <th>Tổng cộng</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-left">Năm 2024</td>
+                    <td>6.278</td>
+                    <td>468</td>
+                    <td>1.668</td>
+                    <td class="font-bold">8.414</td>
+                </tr>
+                <tr>
+                    <td class="text-left">Năm 2025</td>
+                    <td>5.346</td>
+                    <td>888</td>
+                    <td>1.333</td>
+                    <td class="font-bold">7.567</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 4. SIÊU ÂM -->
+    <div class="page-break">
+        <h2 class="section-header">IV. SIÊU ÂM</h2>
+        <p class="mb-2 italic text-sm">Biểu đồ so sánh số lượng ca siêu âm theo tháng</p>
+        <div class="chart-box">
+            <canvas id="chartUS"></canvas>
+        </div>
+        <!-- Bảng rút gọn hiển thị Tổng từng tháng để đối chiếu -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Tháng</th>
+                    <th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th>
+                    <th>T7</th><th>T8</th><th>T9</th><th>T10</th><th>T11</th><th>T12</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="font-bold text-left">2024</td>
+                    <td>83</td><td>43</td><td>133</td><td>400</td><td>798</td><td>1.923</td>
+                    <td>1.486</td><td>1.197</td><td>1.202</td><td>1.442</td><td>162</td><td>-</td>
+                </tr>
+                <tr>
+                    <td class="font-bold text-left">2025</td>
+                    <td>51</td><td>24</td><td>237</td><td>562</td><td>61</td><td>127</td>
+                    <td>90</td><td>350</td><td>1.288</td><td>2.699</td><td>1.453</td><td>-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 5. ĐIỆN TIM -->
+    <div class="page-break">
+        <h2 class="section-header">V. ĐIỆN TIM</h2>
+        <p class="mb-2 italic text-sm">Biểu đồ so sánh số lượng ca điện tim theo tháng</p>
+        <div class="chart-box">
+            <canvas id="chartECG"></canvas>
+        </div>
+         <table>
+            <thead>
+                <tr>
+                    <th>Tháng</th>
+                    <th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th>
+                    <th>T7</th><th>T8</th><th>T9</th><th>T10</th><th>T11</th><th>T12</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="font-bold text-left">2024</td>
+                    <td>22</td><td>35</td><td>73</td><td>373</td><td>823</td><td>498</td>
+                    <td>1.135</td><td>1.436</td><td>893</td><td>1.497</td><td>1.097</td><td>-</td>
+                </tr>
+                <tr>
+                    <td class="font-bold text-left">2025</td>
+                    <td>45</td><td>31</td><td>63</td><td>601</td><td>268</td><td>835</td>
+                    <td>684</td><td>20</td><td>301</td><td>1.861</td><td>3.129</td><td>-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-8 flex justify-end text-center page-break-inside-avoid">
+        <div class="w-1/2">
+            <p class="italic">Hải Phòng, ngày 14 tháng 11 năm 2025</p>
+            <p class="font-bold uppercase">TRƯỞNG KHOA</p>
+            <br><br><br><br>
+        </div>
+    </div>
+
+    <div class="fixed bottom-4 right-4 no-print">
+        <button onclick="window.print()" class="bg-orange-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-orange-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            IN BÁO CÁO
+        </button>
+    </div>
+
+    <script>
+        // --- DỮ LIỆU ---
+        const labels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+
+        // 1. Lab Data (Tổng hợp từ bảng chi tiết)
+        const lab2024 = [405, 222, 409, 1182, 2548, 3589, 4506, 4013, 3814, 3360, 480, 0];
+        const lab2025 = [258, 257, 368, 1880, 2251, 3107, 357, 1933, 3987, 8862, 4482, 0];
+
+        // 2. Xray Data (Từ hàng Tổng Số Ca Chụp)
+        const xray2024 = [142, 79, 147, 462, 814, 1213, 1541, 1352, 1291, 1179, 194, 0];
+        const xray2025 = [116, 179, 145, 567, 94, 385, 181, 163, 1338, 2921, 1478, 0];
+
+        // 3. Ultrasound Data (Tổng Nội + Ngoại)
+        const us2024 = [83, 43, 133, 400, 798, 1923, 1486, 1197, 1202, 1442, 162, 0];
+        const us2025 = [51, 24, 237, 562, 61, 127, 90, 350, 1288, 2699, 1453, 0];
+
+        // 4. ECG Data
+        const ecg2024 = [22, 35, 73, 373, 823, 498, 1135, 1436, 893, 1497, 1097, 0];
+        const ecg2025 = [45, 31, 63, 601, 268, 835, 684, 20, 301, 1861, 3129, 0];
+
+        // --- CẤU HÌNH BIỂU ĐỒ ---
+        Chart.defaults.font.family = "'Times New Roman', serif";
+        Chart.defaults.color = '#333';
+        Chart.register(ChartDataLabels);
+
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    position: 'top',
+                    align: 'end',
+                    labels: { usePointStyle: true, boxWidth: 8 } 
+                },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'top',
+                    font: { weight: 'bold', size: 9 },
+                    color: '#333',
+                    formatter: (value) => value > 0 ? value : '' // Chỉ hiện số nếu > 0
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#e5e5e5', borderDash: [4, 4] }, // Lưới đứt đoạn giống hình mẫu
+                    border: { display: false }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            },
+            layout: { padding: { top: 20 } }
+        };
+
+        // Màu sắc: Cam (#F59E0B) cho 2025 (Nổi bật), Xám (#D1D5DB) cho 2024 (Nền)
+        const color2025 = '#F59E0B'; // Amber-500
+        const color2024 = '#D1D5DB'; // Gray-300
+
+        function createChart(ctxId, label, data24, data25) {
+            new Chart(document.getElementById(ctxId), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '2024',
+                            data: data24,
+                            backgroundColor: color2024,
+                            borderRadius: 2,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        },
+                        {
+                            label: '2025',
+                            data: data25,
+                            backgroundColor: color2025,
+                            borderRadius: 2,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        }
+                    ]
+                },
+                options: commonOptions
+            });
+        }
+
+        // --- KHỞI TẠO ---
+        createChart('chartLab', 'Xét Nghiệm', lab2024, lab2025);
+        createChart('chartXray', 'X-Quang', xray2024, xray2025);
+        createChart('chartUS', 'Siêu Âm', us2024, us2025);
+        createChart('chartECG', 'Điện Tim', ecg2024, ecg2025);
+
+    </script>
+</body>
+</html>
