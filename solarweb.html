@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QTC Land Solar - Trung Tâm Giải Pháp Năng Lượng & Nhà Thông Minh Hải Phòng</title>
+    <meta name="description" content="Nền tảng tương tác giới thiệu giải pháp đèn năng lượng mặt trời, pin lithium và nhà thông minh tại Hải Phòng.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #ca8a04; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a16207; }
+
+        /* Chart Container Strict Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px; /* Constraints chart width on large screens */
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        /* Utility for transitions */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .active-tab {
+            background-color: #ca8a04;
+            color: white;
+            border-color: #ca8a04;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- REQUIRED PLACEHOLDERS -->
+    <!-- Chosen Palette: Solar Gold (#ca8a04) & Tech Slate (#1e293b). Backgrounds: Warm Whites. -->
+    
+    <!-- Application Structure Plan: 
+         1. Hero Dashboard: Immediate value prop & quick stats.
+         2. Interactive Product Ecosystem: Filterable grid organizing the sitemap's fragmented categories (Lights, Batteries, Smart Home) into a cohesive explorer.
+         3. Economic Analysis (The "Why"): Interactive Chart.js line graph comparing Solar ROI vs Grid Costs over time.
+         4. Technical Knowledge Base (The "How"): Interactive selector explaining technical terms found in sitemap (IP67, MPPT, Mono/Poly) to educate the user.
+         5. Lead Capture & Footer: Functional contact area based on index.html data. 
+         Rationale: Moves beyond a static list to a consultative experience, helping users understand financial and technical benefits. -->
+
+    <!-- Visualization & Content Choices:
+         1. Cost Comparison: Line Chart (Chart.js) -> Shows cumulative savings. Goal: Prove financial viability.
+         2. Battery Efficiency: Bar Chart (Chart.js) -> Compare LiFePO4 vs Lead Acid cycles. Goal: Highlight quality differences.
+         3. Tech Specs: Dynamic Text Cards -> Explains IP ratings/Sensors. Goal: Simplify jargon from sitemap.
+         4. Product Grid: JS-filtered DOM elements -> Easy navigation of diverse SKU types. -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-md border-b border-yellow-100">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">Q</div>
+                <div>
+                    <h1 class="font-bold text-slate-800 text-lg leading-tight">QTC Land Solar</h1>
+                    <p class="text-xs text-slate-500">Năng lượng & Nhà thông minh</p>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex space-x-6 text-sm font-medium text-slate-600">
+                <button onclick="scrollToSection('products')" class="hover:text-yellow-600 transition">Sản Phẩm</button>
+                <button onclick="scrollToSection('economics')" class="hover:text-yellow-600 transition">Hiệu Quả Kinh Tế</button>
+                <button onclick="scrollToSection('tech')" class="hover:text-yellow-600 transition">Công Nghệ</button>
+                <button onclick="scrollToSection('contact')" class="bg-yellow-600 text-white px-4 py-2 rounded-full hover:bg-yellow-700 transition shadow-lg shadow-yellow-600/20">Liên Hệ: 0123.456.789</button>
+            </div>
+            
+            <!-- Mobile Menu Button (Simplified) -->
+            <button class="md:hidden text-2xl text-slate-700" onclick="alert('Vui lòng gọi hotline: 0123.456.789')">☰</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative bg-white overflow-hidden">
+        <div class="absolute inset-0 bg-yellow-50/50 z-0"></div>
+        <div class="container mx-auto px-4 py-16 md:py-24 relative z-10 grid md:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6">
+                <span class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase mb-2">Đối tác tin cậy tại Hải Phòng</span>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight">
+                    Giải pháp <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-600">Năng Lượng Xanh</span> <br> & Nhà Thông Minh
+                </h2>
+                <p class="text-lg text-slate-600 leading-relaxed">
+                    QTC Land cung cấp hệ thống chiếu sáng năng lượng mặt trời, giải pháp lưu trữ điện Lithium và thiết bị Smart Home tiêu chuẩn quốc tế. Tiết kiệm chi phí vận hành, bảo vệ môi trường.
+                </p>
+                <div class="flex flex-wrap gap-4 pt-2">
+                    <button onclick="scrollToSection('economics')" class="bg-slate-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-800 transition shadow-xl">Tính toán tiết kiệm</button>
+                    <button onclick="scrollToSection('products')" class="bg-white border-2 border-slate-200 text-slate-700 px-6 py-3 rounded-lg font-semibold hover:border-yellow-500 hover:text-yellow-600 transition">Xem danh mục</button>
+                </div>
+            </div>
+            
+            <!-- Dynamic Stats Cards instead of Hero Image -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="text-3xl mb-2">☀️</div>
+                    <div class="text-2xl font-bold text-slate-800">10+ Năm</div>
+                    <p class="text-sm text-slate-500">Kinh nghiệm tại Hải Phòng</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="text-3xl mb-2">🔋</div>
+                    <div class="text-2xl font-bold text-slate-800">LiFePO4</div>
+                    <p class="text-sm text-slate-500">Công nghệ pin an toàn nhất</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="text-3xl mb-2">💧</div>
+                    <div class="text-2xl font-bold text-slate-800">IP67/68</div>
+                    <p class="text-sm text-slate-500">Chống nước tuyệt đối</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="text-3xl mb-2">🏠</div>
+                    <div class="text-2xl font-bold text-slate-800">IoT</div>
+                    <p class="text-sm text-slate-500">Giải pháp nhà thông minh</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION 1: PRODUCT EXPLORER -->
+    <section id="products" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mb-12">
+                <h3 class="text-yellow-600 font-bold uppercase tracking-widest text-sm mb-2">Hệ Sinh Thái Sản Phẩm</h3>
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Danh Mục Thiết Bị</h2>
+                <p class="text-slate-600">
+                    Khám phá các dòng sản phẩm chất lượng cao của QTC Land. Sử dụng bộ lọc bên dưới để tìm kiếm giải pháp phù hợp cho nhu cầu chiếu sáng dân dụng, công nghiệp hoặc hệ thống nhà thông minh.
+                </p>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="flex flex-wrap gap-3 mb-10 border-b border-slate-100 pb-4">
+                <button onclick="filterProducts('all')" id="btn-all" class="filter-btn active-tab px-5 py-2 rounded-full border border-slate-200 font-medium transition duration-300">Tất cả</button>
+                <button onclick="filterProducts('solar')" id="btn-solar" class="filter-btn px-5 py-2 rounded-full border border-slate-200 font-medium text-slate-600 hover:border-yellow-500 transition duration-300">Đèn Năng Lượng</button>
+                <button onclick="filterProducts('energy')" id="btn-energy" class="filter-btn px-5 py-2 rounded-full border border-slate-200 font-medium text-slate-600 hover:border-yellow-500 transition duration-300">Lưu Trữ & Phụ Kiện</button>
+                <button onclick="filterProducts('smarthome')" id="btn-smarthome" class="filter-btn px-5 py-2 rounded-full border border-slate-200 font-medium text-slate-600 hover:border-yellow-500 transition duration-300">Nhà Thông Minh</button>
+            </div>
+
+            <!-- Product Grid -->
+            <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- JS will populate this -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: ECONOMIC ANALYSIS (Chart.js) -->
+    <section id="economics" class="py-16 md:py-24 bg-slate-50 border-y border-slate-200">
+        <div class="container mx-auto px-4">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                
+                <!-- Text Content -->
+                <div>
+                    <h3 class="text-yellow-600 font-bold uppercase tracking-widest text-sm mb-2">Phân Tích Tài Chính</h3>
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Bài toán đầu tư: Solar vs Điện Lưới</h2>
+                    <p class="text-slate-600 mb-6 leading-relaxed">
+                        Biểu đồ bên mô phỏng chi phí tích lũy trong 10 năm giữa việc sử dụng đèn đường điện lưới (bao gồm chi phí lắp đặt, dây cáp, tiền điện hàng tháng) so với đèn năng lượng mặt trời QTC Land.
+                    </p>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-500 mb-8">
+                        <h4 class="font-bold text-slate-800 mb-2">Điểm hòa vốn (ROI)</h4>
+                        <p class="text-sm text-slate-600">
+                            Thông thường, hệ thống đèn năng lượng mặt trời sẽ đạt điểm hòa vốn sau <span class="font-bold text-yellow-600">18 - 24 tháng</span>. Sau thời gian này, quý khách hoàn toàn sử dụng năng lượng miễn phí.
+                        </p>
+                    </div>
+
+                    <!-- Interactive Slider -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <label for="billSlider" class="block text-sm font-bold text-slate-700 mb-2">Chi phí tiền điện dự kiến hàng tháng (VNĐ):</label>
+                        <input type="range" id="billSlider" min="100000" max="2000000" step="100000" value="500000" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-yellow-600">
+                        <div class="flex justify-between text-xs text-slate-500 mt-2">
+                            <span>100k</span>
+                            <span id="sliderValue" class="font-bold text-yellow-600 text-lg">500,000 đ</span>
+                            <span>2 Triệu</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualization -->
+                <div class="bg-white p-4 md:p-8 rounded-2xl shadow-lg">
+                    <h4 class="text-center font-bold text-slate-700 mb-4">Biểu đồ so sánh chi phí tích lũy (10 Năm)</h4>
+                    <div class="chart-container">
+                        <canvas id="roiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: TECH DEEP DIVE -->
+    <section id="tech" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h3 class="text-yellow-600 font-bold uppercase tracking-widest text-sm mb-2">Kiến Thức Kỹ Thuật</h3>
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Hiểu Về Công Nghệ Cốt Lõi</h2>
+                <p class="text-slate-600">
+                    Để chọn được sản phẩm bền bỉ, QTC Land giúp bạn hiểu rõ các thông số kỹ thuật quan trọng thường gặp trên các bảng dữ liệu sản phẩm.
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                
+                <!-- Topic List -->
+                <div class="lg:col-span-1 space-y-3">
+                    <button onclick="showTech('battery')" class="tech-btn w-full text-left p-4 rounded-lg bg-yellow-50 border-l-4 border-yellow-500 text-slate-800 font-bold shadow-sm transition hover:bg-yellow-100" data-target="battery">
+                        🔋 Công nghệ Pin (Lithium vs Chì)
+                    </button>
+                    <button onclick="showTech('ip')" class="tech-btn w-full text-left p-4 rounded-lg bg-white border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition" data-target="ip">
+                        💧 Tiêu chuẩn IP67/IP68
+                    </button>
+                    <button onclick="showTech('solar')" class="tech-btn w-full text-left p-4 rounded-lg bg-white border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition" data-target="solar">
+                        ☀️ Tấm Pin (Mono vs Poly)
+                    </button>
+                    <button onclick="showTech('controller')" class="tech-btn w-full text-left p-4 rounded-lg bg-white border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition" data-target="controller">
+                        ⚡ Bộ điều khiển (MPPT/PWM)
+                    </button>
+                </div>
+
+                <!-- Dynamic Content Area -->
+                <div class="lg:col-span-2 bg-slate-900 text-white rounded-2xl p-8 relative overflow-hidden min-h-[400px] flex flex-col justify-center">
+                    <!-- Background Decoration -->
+                    <div class="absolute top-0 right-0 p-12 opacity-5 text-9xl font-serif">?</div>
+                    
+                    <div id="tech-display" class="relative z-10 fade-in">
+                        <!-- Content injected via JS -->
+                    </div>
+
+                    <!-- Inner Chart Container for Tech Specs -->
+                    <div id="tech-chart-wrapper" class="hidden mt-6 chart-container" style="height: 250px; max-width: 600px;">
+                        <canvas id="techChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: CONTACT & FOOTER -->
+    <footer id="contact" class="bg-slate-900 text-slate-300 pt-16 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <!-- Company Info -->
+                <div>
+                    <h3 class="text-white text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="w-8 h-8 bg-yellow-600 rounded flex items-center justify-center text-xs">QTC</span>
+                        Land Solar
+                    </h3>
+                    <p class="text-sm leading-relaxed mb-4">
+                        Chuyên gia hàng đầu về đèn năng lượng mặt trời, pin lithium và giải pháp nhà thông minh tại Hải Phòng.
+                    </p>
+                    <div class="flex space-x-3">
+                        <!-- Social Placeholders -->
+                        <a href="#" class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center hover:bg-yellow-600 transition">f</a>
+                        <a href="#" class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center hover:bg-yellow-600 transition">z</a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Sản Phẩm</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-yellow-500 transition">Đèn đường Solar</a></li>
+                        <li><a href="#" class="hover:text-yellow-500 transition">Đèn sân vườn</a></li>
+                        <li><a href="#" class="hover:text-yellow-500 transition">Đèn pha LED</a></li>
+                        <li><a href="#" class="hover:text-yellow-500 transition">Nhà thông minh</a></li>
+                    </ul>
+                </div>
+
+                <!-- Policies -->
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Hỗ Trợ</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-yellow-500 transition">Chính sách bảo mật</a></li>
+                        <li><a href="#" class="hover:text-yellow-500 transition">Điều khoản sử dụng</a></li>
+                        <li><a href="#" class="hover:text-yellow-500 transition">Chính sách bảo hành</a></li>
+                        <li><a href="#" class="hover:text-yellow-500 transition">Hướng dẫn lắp đặt</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info (Extracted from index.html) -->
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Liên Hệ</h4>
+                    <address class="not-italic text-sm space-y-3">
+                        <p class="flex items-start gap-3">
+                            <span class="text-yellow-500">📍</span>
+                            Số 123, Đường Lạch Tray, Quận Lê Chân, Hải Phòng
+                        </p>
+                        <p class="flex items-center gap-3">
+                            <span class="text-yellow-500">📞</span>
+                            <a href="tel:0123456789" class="hover:text-yellow-500 transition">0123.456.789</a>
+                        </p>
+                        <p class="flex items-center gap-3">
+                            <span class="text-yellow-500">✉️</span>
+                            <a href="mailto:info@solar.qtcland.com" class="hover:text-yellow-500 transition">info@solar.qtcland.com</a>
+                        </p>
+                        <p class="flex items-center gap-3">
+                            <span class="text-yellow-500">🕒</span>
+                            8:00 - 18:00 (T2-CN)
+                        </p>
+                    </address>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-slate-800 pt-8 text-center text-xs text-slate-500">
+                <p>&copy; 2026 QTC Land Solar. Bảo lưu mọi quyền.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. DATA STORAGE ---
+        
+        // Products derived from sitemap.xml categorization
+        const products = [
+            { id: 1, name: "Đèn Đường Liền Thể", category: "solar", icon: "🛣️", desc: "Tích hợp pin và đèn, lắp đặt dễ dàng.", price: "Từ 500k" },
+            { id: 2, name: "Đèn Đường Rời Thể", category: "solar", icon: "🏙️", desc: "Tấm pin lớn, công suất cao cho dự án.", price: "Từ 1.2tr" },
+            { id: 3, name: "Đèn Pha Năng Lượng", category: "solar", icon: "🔦", desc: "Chiếu sáng bảng hiệu, sân vườn rộng.", price: "Từ 450k" },
+            { id: 4, name: "Đèn Trụ Cổng", category: "solar", icon: "⛩️", desc: "Trang trí và chiếu sáng lối đi.", price: "Từ 300k" },
+            { id: 5, name: "Đèn UFO Đĩa Bay", category: "solar", icon: "🛸", desc: "Chiếu sáng 360 độ cho sân vườn.", price: "Từ 800k" },
+            { id: 6, name: "Pin Lithium LiFePO4", category: "energy", icon: "🔋", desc: "Tuổi thọ 10 năm, an toàn chống cháy nổ.", price: "Liên hệ" },
+            { id: 7, name: "Biến Tần (Inverter)", category: "energy", icon: "⚡", desc: "Chuyển đổi DC/AC hiệu suất cao.", price: "Liên hệ" },
+            { id: 8, name: "Công Tắc Thông Minh", category: "smarthome", icon: "🔘", desc: "Điều khiển qua điện thoại/giọng nói.", price: "Từ 200k" },
+            { id: 9, name: "Cảm Biến An Ninh", category: "smarthome", icon: "📡", desc: "Phát hiện chuyển động, báo động.", price: "Từ 150k" }
+        ];
+
+        // Tech Knowledge Base
+        const techData = {
+            battery: {
+                title: "Công Nghệ Pin Lithium vs Acquy Chì",
+                content: "Pin Lithium Iron Phosphate (LiFePO4) là tiêu chuẩn vàng cho điện mặt trời hiện đại. So với acquy chì truyền thống, nó nhẹ hơn, nạp nhanh hơn và đặc biệt là tuổi thọ gấp 4-5 lần.",
+                chartType: "bar",
+                chartData: {
+                    labels: ['Acquy Chì (Lead Acid)', 'Pin Lithium (LiFePO4)'],
+                    datasets: [{
+                        label: 'Số chu kỳ nạp xả (Tuổi thọ)',
+                        data: [500, 2500],
+                        backgroundColor: ['#94a3b8', '#ca8a04'],
+                        borderWidth: 0
+                    }]
+                }
+            },
+            ip: {
+                title: "Tiêu Chuẩn Bảo Vệ IP67/IP68",
+                content: "<ul class='list-disc pl-5 space-y-2'><li><strong>Số 6:</strong> Chống bụi hoàn toàn. Bụi không thể xâm nhập vào thiết bị.</li><li><strong>Số 7/8:</strong> Chống nước. IP67 chịu được ngâm nước sâu 1m trong 30 phút. IP68 chịu được áp lực nước lớn hơn trong thời gian dài.</li></ul><p class='mt-4 text-yellow-400'>Tất cả đèn ngoài trời của QTC Land đều đạt chuẩn tối thiểu IP66.</p>",
+                chartType: "none"
+            },
+            solar: {
+                title: "Tấm Pin Mono vs Poly",
+                content: "<strong>Mono (Đơn tinh thể):</strong> Hiệu suất cao hơn, hoạt động tốt hơn trong điều kiện ánh sáng yếu hoặc trời nhiều mây. Màu đen đồng nhất.<br><br><strong>Poly (Đa tinh thể):</strong> Chi phí thấp hơn, hiệu suất thấp hơn một chút. Màu xanh lấp lánh.",
+                chartType: "none"
+            },
+            controller: {
+                title: "Bộ Điều Khiển Sạc MPPT vs PWM",
+                content: "<strong>PWM:</strong> Cắt giảm điện áp dư thừa, gây lãng phí năng lượng (Hiệu suất ~70%).<br><br><strong>MPPT:</strong> Tối ưu hóa điểm công suất cực đại, chuyển đổi điện áp dư thành dòng điện, tăng hiệu suất sạc lên đến 98%.",
+                chartType: "none"
+            }
+        };
+
+        // --- 2. INITIALIZATION ---
+
+        let roiChartInstance = null;
+        let techChartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts('all');
+            initROIChart();
+            showTech('battery'); // Default selection
+        });
+
+        // --- 3. NAVIGATION ---
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // --- 4. PRODUCT LOGIC ---
+        function filterProducts(category) {
+            // Update buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active-tab', 'bg-yellow-600', 'text-white', 'border-yellow-600');
+                btn.classList.add('text-slate-600', 'border-slate-200');
+            });
+            const activeBtn = document.getElementById(`btn-${category}`);
+            activeBtn.classList.add('active-tab');
+            activeBtn.classList.remove('text-slate-600', 'border-slate-200');
+
+            renderProducts(category);
+        }
+
+        function renderProducts(category) {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            
+            const filtered = category === 'all' ? products : products.filter(p => p.category === category);
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "group bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-xl transition duration-300 overflow-hidden flex flex-col fade-in";
+                card.innerHTML = `
+                    <div class="bg-slate-50 h-40 flex items-center justify-center text-6xl group-hover:scale-110 transition duration-500">
+                        ${p.icon}
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wide bg-yellow-50 px-2 py-1 rounded">${getCategoryName(p.category)}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2 group-hover:text-yellow-600 transition">${p.name}</h3>
+                        <p class="text-slate-500 text-sm mb-4 flex-1">${p.desc}</p>
+                        <div class="flex justify-between items-center mt-auto pt-4 border-t border-slate-100">
+                            <span class="font-bold text-slate-800">${p.price}</span>
+                            <button class="text-yellow-600 text-sm font-medium hover:underline">Chi tiết &rarr;</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function getCategoryName(cat) {
+            if (cat === 'solar') return 'Năng Lượng';
+            if (cat === 'energy') return 'Lưu Trữ';
+            if (cat === 'smarthome') return 'Thông Minh';
+            return 'Khác';
+        }
+
+        // --- 5. ECONOMIC CHART LOGIC (Chart.js) ---
+        function initROIChart() {
+            const ctx = document.getElementById('roiChart').getContext('2d');
+            const slider = document.getElementById('billSlider');
+            const sliderValDisplay = document.getElementById('sliderValue');
+
+            const years = Array.from({length: 11}, (_, i) => i); // 0 to 10
+
+            // Configuration for consistent styling
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#64748b';
+
+            roiChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years.map(y => `Năm ${y}`),
+                    datasets: [
+                        {
+                            label: 'Điện Lưới (Tích lũy)',
+                            data: [], // Populated by update function
+                            borderColor: '#ef4444', // Red
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Điện Mặt Trời (Tích lũy)',
+                            data: [], // Populated by update function
+                            borderColor: '#ca8a04', // Yellow/Gold
+                            backgroundColor: 'rgba(202, 138, 4, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.raw);
+                                }
+                            }
+                        },
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value / 1000000 + ' Tr';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Initial calculation
+            updateChart(parseInt(slider.value));
+
+            // Slider Event Listener
+            slider.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                sliderValDisplay.innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+                updateChart(val);
+            });
+        }
+
+        function updateChart(monthlyBill) {
+            // Assumptions
+            const solarInstallCost = monthlyBill * 12 * 1.5; // Rough estimate: ROI ~1.5 years for lights
+            const yearlyInflation = 0.05; // 5% electricity price increase
+
+            const gridData = [0];
+            const solarData = [solarInstallCost];
+
+            let currentAnnualBill = monthlyBill * 12;
+            let cumulativeGrid = 0;
+            let cumulativeSolar = solarInstallCost;
+
+            for (let i = 1; i <= 10; i++) {
+                // Grid calculation
+                cumulativeGrid += currentAnnualBill;
+                gridData.push(cumulativeGrid);
+                currentAnnualBill = currentAnnualBill * (1 + yearlyInflation);
+
+                // Solar calculation (Minimal maintenance cost after year 5)
+                const maintenance = i > 5 ? (solarInstallCost * 0.02) : 0; 
+                cumulativeSolar += maintenance;
+                solarData.push(cumulativeSolar);
+            }
+
+            roiChartInstance.data.datasets[0].data = gridData;
+            roiChartInstance.data.datasets[1].data = solarData;
+            roiChartInstance.update();
+        }
+
+        // --- 6. TECH INTERACTIVE LOGIC ---
+        function showTech(key) {
+            // UI Updates
+            document.querySelectorAll('.tech-btn').forEach(btn => {
+                btn.classList.remove('bg-yellow-50', 'border-l-4', 'border-yellow-500', 'text-slate-800', 'font-bold', 'shadow-sm');
+                btn.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-600', 'font-medium');
+                
+                if(btn.dataset.target === key) {
+                     btn.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-600', 'font-medium');
+                     btn.classList.add('bg-yellow-50', 'border-l-4', 'border-yellow-500', 'text-slate-800', 'font-bold', 'shadow-sm');
+                }
+            });
+
+            const data = techData[key];
+            const container = document.getElementById('tech-display');
+            const chartWrapper = document.getElementById('tech-chart-wrapper');
+
+            // Render Text
+            container.innerHTML = `
+                <h3 class="text-2xl font-bold text-yellow-400 mb-4">${data.title}</h3>
+                <div class="text-lg text-slate-300 leading-relaxed">${data.content}</div>
+            `;
+
+            // Render Chart if applicable
+            if (data.chartType !== 'none') {
+                chartWrapper.classList.remove('hidden');
+                renderTechChart(data);
+            } else {
+                chartWrapper.classList.add('hidden');
+            }
+            
+            // Re-trigger animation
+            container.classList.remove('fade-in');
+            void container.offsetWidth; // trigger reflow
+            container.classList.add('fade-in');
+        }
+
+        function renderTechChart(data) {
+            const ctx = document.getElementById('techChart').getContext('2d');
+            
+            if (techChartInstance) {
+                techChartInstance.destroy();
+            }
+
+            techChartInstance = new Chart(ctx, {
+                type: data.chartType,
+                data: data.chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Horizontal bar
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#cbd5e1' } },
+                        y: { grid: { display: false }, ticks: { color: '#ffffff', font: { size: 14 } } }
+                    }
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>
