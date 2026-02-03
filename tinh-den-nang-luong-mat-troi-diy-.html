@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ Tính toán Năng lượng Mặt trời - Phạm Đức Ngọc Logic</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 20px; line-height: 1.6; }
+       .container { max-width: 600px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        h2 { color: var(--primary); border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0; }
+       .step { margin-bottom: 25px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; }
+       .step-title { font-weight: bold; margin-bottom: 15px; display: block; color: #475569; }
+        label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+       .checkbox-group { display: flex; align-items: center; gap: 10px; background: #fffbeb; padding: 10px; border-radius: 6px; border: 1px solid #fef3c7; }
+       .checkbox-group input { width: auto; margin: 0; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #1d4ed8; }
+        #result { margin-top: 25px; padding: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; display: none; }
+       .res-item { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #dcfce7; padding-bottom: 5px; }
+       .res-val { font-weight: bold; color: #166534; }
+       .warning { font-size: 0.8rem; color: #92400e; margin-top: -10px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>⚡ Tính toán Hệ thống Đèn LED</h2>
+    
+    <div class="step">
+        <span class="step-title">Bước 1: Thông số đèn & Thời gian</span>
+        <label>Điện áp đèn (V)</label>
+        <input type="number" id="voltage" value="12" placeholder="Ví dụ: 6, 12, 24">
+        
+        <label>Công suất nhãn (W)</label>
+        <input type="number" id="power" value="50" placeholder="Ví dụ: 50">
+        
+        <div class="checkbox-group">
+            <input type="checkbox" id="isRealPower">
+            <label for="isRealPower">Đây là công suất thực tế (đã đo)</label>
+        </div>
+        <p class="warning">* Nếu là đèn Shopee 50W giá rẻ, công suất thực thường chỉ ~7.2W.</p>
+        
+        <label>Thời gian sử dụng (Giờ/ngày)</label>
+        <input type="number" id="hours" value="8">
+    </div>
+
+    <div class="step">
+        <span class="step-title">Bước 2: Chọn loại Pin lưu trữ</span>
+        <select id="batteryType">
+            <option value="lead-acid">Ắc quy Axit-chì (DoD 50%)</option>
+            <option value="lithium">Pin Lithium/LiFePO4 (DoD 90%)</option>
+        </select>
+    </div>
+
+    <div class="step">
+        <span class="step-title">Bước 3: Chọn công nghệ sạc</span>
+        <select id="chargeType">
+            <option value="pwm">Điều khiển sạc PWM (Hiệu suất 75%)</option>
+            <option value="mppt">Điều khiển sạc MPPT (Hiệu suất 95%)</option>
+        </select>
+    </div>
+
+    <button onclick="calculate()">TÍNH TOÁN KẾT QUẢ</button>
+
+    <div id="result">
+        <h3 style="margin-top:0">📊 Kết quả đề xuất</h3>
+        <div class="res-item"><span>Công suất thực tính toán:</span> <span class="res-val" id="outRealPower">--</span></div>
+        <div class="res-item"><span>Năng lượng tiêu thụ:</span> <span class="res-val" id="outEnergy">--</span></div>
+        <div class="res-item"><span>Dung lượng Pin cần (Ah):</span> <span class="res-val" id="outAh">--</span></div>
+        <div class="res-item"><span>Công suất Tấm pin (Wp):</span> <span class="res-val" id="outWp">--</span></div>
+        <div class="res-item"><span>Thời gian sạc đầy (nắng tốt):</span> <span class="res-val" id="outChargeTime">--</span></div>
+        <p style="font-size: 0.8rem; font-style: italic; margin-top: 15px;">* Tính toán dựa trên hệ số an toàn 1.5x và 4 giờ nắng đỉnh trung bình.</p>
+    </div>
+</div>
+
+<script>
+function calculate() {
+    // Lấy dữ liệu đầu vào
+    const V = parseFloat(document.getElementById('voltage').value);
+    let P = parseFloat(document.getElementById('power').value);
+    const H = parseFloat(document.getElementById('hours').value);
+    const isReal = document.getElementById('isRealPower').checked;
+    const batType = document.getElementById('batteryType').value;
+    const chargeType = document.getElementById('chargeType').value;
+
+    // Logic hiệu chỉnh công suất thực (nếu chọn đèn 50W Shopee mà không tích "đã đo")
+    if (!isReal && P >= 50) {
+        P = P * 0.15; // Giả định thực tế chỉ chiếm ~15-20% công suất nhãn
+    }
+
+    // 1. Tính năng lượng tiêu thụ Wh
+    const Wh = P * H;
+
+    // 2. Tính Ah Pin
+    // SLA: DoD 0.5, Eff 0.85 | Lithium: DoD 0.9, Eff 0.95
+    let dod = (batType === 'lead-acid')? 0.5 : 0.9;
+    let batEff = (batType === 'lead-acid')? 0.85 : 0.95;
+    const Ah = Wh / (V * dod * batEff);
+
+    // 3. Tính Tấm pin Wp (Hệ số an toàn 1.5, giờ nắng 4h)
+    let chargeEff = (chargeType === 'pwm')? 0.75 : 0.95;
+    const SF = 1.5;
+    const PSH = 4;
+    const Wp = (Wh * SF) / (PSH * chargeEff);
+
+    // 4. Tính thời gian sạc (Giả định dòng sạc trung bình)
+    // Thời gian sạc = Wh_cần_nạp / (Wp * Eff_sạc)
+    const chargeTime = (Wh / batEff) / (Wp * chargeEff);
+
+    // Hiển thị kết quả
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('outRealPower').innerText = P.toFixed(1) + " W";
+    document.getElementById('outEnergy').innerText = Wh.toFixed(0) + " Wh/ngày";
+    document.getElementById('outAh').innerText = Math.ceil(Ah) + " Ah";
+    document.getElementById('outWp').innerText = Math.ceil(Wp) + " Wp";
+    document.getElementById('outChargeTime').innerText = chargeTime.toFixed(1) + " giờ nắng";
+}
+</script>
+
+</body>
+</html>
