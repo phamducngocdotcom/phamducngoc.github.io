@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Tạo Mã Sản Phẩm Nhúng</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { text-align: center; color: #ee4d2d; margin-bottom: 30px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .tab-btn { padding: 10px 20px; border: none; background: #f0f0f0; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .tab-btn.active { background: #ee4d2d; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .grid-item-form { border: 1px dashed #ee4d2d; padding: 15px; margin-bottom: 15px; border-radius: 8px; background: #fffaf9; }
+        .btn { background: #ee4d2d; color: #fff; border: none; padding: 12px 25px; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 16px; width: 100%; margin-top: 10px; }
+        .btn:hover { background: #d73211; }
+        .btn-copy { background: #28a745; margin-top: 20px; }
+        .btn-copy:hover { background: #218838; }
+        .output-section { margin-top: 30px; }
+        .output-section textarea { width: 100%; height: 200px; font-family: monospace; font-size: 13px; background: #2d2d2d; color: #00ff00; padding: 15px; border-radius: 5px; }
+        .preview-section { margin-top: 30px; border: 1px solid #ddd; padding: 20px; border-radius: 10px; background: #fafafa; }
+        .preview-title { font-weight: bold; margin-bottom: 15px; color: #555; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        .row { display: flex; gap: 20px; }
+        .col { flex: 1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Công Cụ Tạo Mã Nhúng Sản Phẩm</h1>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('single')">1. Box Sản Phẩm Đơn</button>
+        <button class="tab-btn" onclick="switchTab('grid')">2. Danh Sách Sản Phẩm (Grid)</button>
+    </div>
+
+    <div id="single" class="tab-content active">
+        <div class="row">
+            <div class="col">
+                <div class="form-group"><label>Link Shopee (Affiliate):</label><input type="text" id="s_link" value="https://s.shopee.vn/8V3W53G6MB"></div>
+                <div class="form-group"><label>Link Hình Ảnh (Image URL):</label><input type="text" id="s_img" value="https://manluxury.vn/wp-content/uploads/2024/08/image-28.png"></div>
+                <div class="form-group"><label>Tên Sản Phẩm:</label><input type="text" id="s_name" value="Giày Sneaker Unisex LEOnerva 808 VS2"></div>
+                <div class="form-group"><label>Thông tin Đánh Giá (Ví dụ: ⭐ 4.9 | 1.2k Đánh Giá | Đã bán 10k+):</label><input type="text" id="s_rating" value="⭐ 4.9 | 1.2k Đánh Giá | Đã bán 10k+"></div>
+            </div>
+            <div class="col">
+                <div class="form-group"><label>Giá Mới:</label><input type="text" id="s_price_new" value="480.000₫ - 490.000₫"></div>
+                <div class="form-group"><label>Giá Cũ:</label><input type="text" id="s_price_old" value="550.000₫"></div>
+                <div class="form-group"><label>Phần trăm giảm (Ví dụ: -13%):</label><input type="text" id="s_discount" value="-13%"></div>
+                <div class="form-group"><label>Phân loại (Biến thể - Dùng &lt;br&gt; để xuống dòng):</label><input type="text" id="s_variants" value="Màu: Đế Nâu | Trắng Đen | Xanh Lá <br> Size: 36 - 45"></div>
+            </div>
+        </div>
+        <button class="btn" onclick="generateSingle()">TẠO CODE SẢN PHẨM ĐƠN</button>
+    </div>
+
+    <div id="grid" class="tab-content">
+        <div class="form-group" style="max-width: 300px;">
+            <label>Số lượng sản phẩm muốn tạo:</label>
+            <input type="number" id="grid_count" value="4" min="1" max="20" onchange="renderGridForms()">
+        </div>
+        <div id="grid_forms_container" class="row" style="flex-wrap: wrap;"></div>
+        <button class="btn" onclick="generateGrid()">TẠO CODE DANH SÁCH (GRID)</button>
+    </div>
+
+    <div class="output-section">
+        <button class="btn btn-copy" onclick="copyCode()">📋 COPY CODE HTML</button>
+        <textarea id="result_code" readonly placeholder="Mã HTML sẽ hiện ở đây..."></textarea>
+    </div>
+
+    <div class="preview-section">
+        <div class="preview-title">👁️ Xem Trước Giao Diện (Preview)</div>
+        <div id="preview_area"></div>
+    </div>
+</div>
+
+<script>
+    // Chuyển Tab
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // STYLE MẶC ĐỊNH BẠN ĐÃ CUNG CẤP
+    const cssSingle = `\n<style>\n.ngoc-product-box { max-width: 900px; margin: 20px auto; font-family: Arial, sans-serif; }\n.ngoc-product-card { display: flex; gap: 20px; border: 1px solid #eee; border-radius: 10px; padding: 15px; transition: 0.3s; background: #fff; }\n.ngoc-product-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.1); transform: translateY(-3px); }\n.ngoc-product-image img { width: 260px; border-radius: 8px; }\n.ngoc-product-info { flex: 1; }\n.ngoc-product-info h3 { font-size: 20px; margin-bottom: 8px; color: #222; }\n.ngoc-rating { color: #ff9900; font-size: 14px; margin-bottom: 10px; }\n.ngoc-price { margin-bottom: 12px; }\n.price-new { font-size: 22px; font-weight: bold; color: #ee4d2d; margin-right: 10px; }\n.price-old { text-decoration: line-through; color: #888; margin-right: 8px; }\n.discount { background: #ee4d2d; color: #fff; padding: 2px 6px; font-size: 12px; border-radius: 4px; }\n.ngoc-variants { font-size: 14px; color: #555; margin-bottom: 15px; }\n.ngoc-button { display: inline-block; background: #ee4d2d; color: #fff; padding: 10px 20px; border-radius: 6px; font-weight: bold; transition: 0.3s; }\n.ngoc-product-card:hover .ngoc-button { background: #d73211; }\n.ngoc-product-card a { text-decoration: none; color: inherit; }\n@media (max-width: 768px) { .ngoc-product-card { flex-direction: column; text-align: center; } .ngoc-product-image img { width: 100%; } }\n</style>`;
+
+    const cssGrid = `\n<style>\n.ngoc-grid-wrapper { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin: 20px 0; font-family: Arial, sans-serif; }\n.ngoc-product-item { border: 1px solid #eee; border-radius: 10px; padding: 12px; background: #fff; position: relative; transition: 0.3s; }\n.ngoc-product-item:hover { box-shadow: 0 8px 18px rgba(0,0,0,0.1); transform: translateY(-4px); }\n.ngoc-product-item img { width: 100%; border-radius: 8px; }\n.ngoc-product-item h3 { font-size: 14px; margin: 10px 0 6px; min-height: 38px; }\n.new-price { color: #ee4d2d; font-weight: bold; }\n.old-price { text-decoration: line-through; color: #888; font-size: 13px; margin-left: 6px; }\n.ngoc-rating { font-size: 13px; color: #ff9900; }\n.ngoc-badge { position: absolute; top: 10px; left: 10px; background: #ee4d2d; color: #fff; font-size: 12px; padding: 3px 6px; border-radius: 4px; }\n.ngoc-product-item a { text-decoration: none; color: inherit; }\n</style>`;
+
+    // Render form điền Grid tùy theo số lượng
+    function renderGridForms() {
+        const count = document.getElementById('grid_count').value;
+        const container = document.getElementById('grid_forms_container');
+        container.innerHTML = '';
+        for (let i = 1; i <= count; i++) {
+            container.innerHTML += `
+                <div class="col" style="min-width: 300px;">
+                    <div class="grid-item-form">
+                        <h4 style="margin-top:0; color:#ee4d2d;">Sản phẩm ${i}</h4>
+                        <div class="form-group"><input type="text" id="g_link_${i}" placeholder="Link Shopee" value="https://s.shopee.vn/8V3W53G6MB"></div>
+                        <div class="form-group"><input type="text" id="g_badge_${i}" placeholder="Badge (VD: Yêu thích)" value="Yêu thích"></div>
+                        <div class="form-group"><input type="text" id="g_img_${i}" placeholder="Link Ảnh" value="https://manluxury.vn/wp-content/uploads/2024/08/Sneaker-Unisex-LEOnerva-808.webp"></div>
+                        <div class="form-group"><input type="text" id="g_name_${i}" placeholder="Tên sản phẩm" value="LEOnerva 808 Mẫu ${i}"></div>
+                        <div class="form-group"><input type="text" id="g_price_new_${i}" placeholder="Giá mới" value="480.000₫"></div>
+                        <div class="form-group"><input type="text" id="g_price_old_${i}" placeholder="Giá cũ" value="550.000₫"></div>
+                        <div class="form-group"><input type="text" id="g_rating_${i}" placeholder="Đánh giá" value="⭐ 4.9 | Đã bán 10k+"></div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    // Gọi lần đầu để hiển thị các ô nhập grid
+    renderGridForms();
+
+    // Tạo mã cho SP Đơn
+    function generateSingle() {
+        const link = document.getElementById('s_link').value;
+        const img = document.getElementById('s_img').value;
+        const name = document.getElementById('s_name').value;
+        const rating = document.getElementById('s_rating').value;
+        const priceNew = document.getElementById('s_price_new').value;
+        const priceOld = document.getElementById('s_price_old').value;
+        const discount = document.getElementById('s_discount').value;
+        const variants = document.getElementById('s_variants').value;
+
+        const html = `
+<div class="ngoc-product-box">
+  <a href="${link}" target="_blank" rel="nofollow sponsored">
+    <div class="ngoc-product-card">
+      <div class="ngoc-product-image">
+        <img src="${img}" alt="${name}">
+      </div>
+      <div class="ngoc-product-info">
+        <h3>${name}</h3>
+        <div class="ngoc-rating">${rating}</div>
+        <div class="ngoc-price">
+          <span class="price-new">${priceNew}</span>
+          <span class="price-old">${priceOld}</span>
+          <span class="discount">${discount}</span>
+        </div>
+        <div class="ngoc-variants">${variants}</div>
+        <div class="ngoc-button">Mua Ngay Trên Shopee</div>
+      </div>
+    </div>
+  </a>
+</div>`;
+        
+        const finalCode = html + cssSingle;
+        document.getElementById('result_code').value = finalCode;
+        document.getElementById('preview_area').innerHTML = finalCode;
+    }
+
+    // Tạo mã cho Grid
+    function generateGrid() {
+        const count = document.getElementById('grid_count').value;
+        let itemsHtml = '';
+
+        for (let i = 1; i <= count; i++) {
+            const link = document.getElementById(`g_link_${i}`).value;
+            const badge = document.getElementById(`g_badge_${i}`).value;
+            const img = document.getElementById(`g_img_${i}`).value;
+            const name = document.getElementById(`g_name_${i}`).value;
+            const priceNew = document.getElementById(`g_price_new_${i}`).value;
+            const priceOld = document.getElementById(`g_price_old_${i}`).value;
+            const rating = document.getElementById(`g_rating_${i}`).value;
+
+            itemsHtml += `
+  <div class="ngoc-product-item">
+    <a href="${link}" target="_blank" rel="nofollow sponsored">
+      <div class="ngoc-badge">${badge}</div>
+      <img src="${img}" alt="${name}" loading="lazy">
+      <h3>${name}</h3>
+      <div class="ngoc-price">
+        <span class="new-price">${priceNew}</span>
+        <span class="old-price">${priceOld}</span>
+      </div>
+      <div class="ngoc-rating">${rating}</div>
+    </a>
+  </div>\n`;
+        }
+
+        const html = `<div class="ngoc-grid-wrapper">\n${itemsHtml}</div>`;
+        const finalCode = html + cssGrid;
+        
+        document.getElementById('result_code').value = finalCode;
+        document.getElementById('preview_area').innerHTML = finalCode;
+    }
+
+    // Nút Copy
+    function copyCode() {
+        const code = document.getElementById('result_code');
+        if(!code.value) {
+            alert('Vui lòng tạo mã trước khi copy!');
+            return;
+        }
+        code.select();
+        code.setSelectionRange(0, 99999); // Dành cho mobile
+        navigator.clipboard.writeText(code.value).then(() => {
+            alert("Đã copy thành công! Giờ bạn có thể dán (paste) vào website của mình.");
+        }).catch(err => {
+            alert("Copy thất bại, vui lòng bôi đen và copy thủ công.");
+        });
+    }
+</script>
+</body>
+</html>
