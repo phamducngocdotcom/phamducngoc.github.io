@@ -3,75 +3,58 @@ layout: default
 title: "Thoi tiet Hai Phong"
 ---
 
-<div class="hpwx" id="hpwx">
-  <div class="hpwx-head">
-    <div class="hpwx-title">🌤 Thời tiết Hải Phòng</div>
-    <div class="hpwx-updated" id="hpwx-updated">Đang tải dữ liệu…</div>
-  </div>
-  <div class="hpwx-now" id="hpwx-now" style="display:none">
-    <div class="hpwx-now-left">
-      <div class="hpwx-temp" id="hpwx-temp">--°C</div>
-      <div class="hpwx-desc" id="hpwx-desc">--</div>
-    </div>
-    <div class="hpwx-now-right" id="hpwx-details"></div>
-  </div>
-  <div class="hpwx-hours" id="hpwx-hours"></div>
-  <div class="hpwx-foot">Nguồn: weather.com · tự động cập nhật theo Google Sheet</div>
-</div>
-<style>
-.hpwx{width:100%;max-width:100%;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#fff;border:1px solid #e3e8ef;border-radius:12px;overflow:hidden;color:#1f2937;font-size:14px;line-height:1.45}
-.hpwx *{box-sizing:border-box}
-.hpwx-head{background:linear-gradient(135deg,#0ea5e9,#2563eb);color:#fff;padding:10px 14px}
-.hpwx-title{font-weight:700;font-size:16px}
-.hpwx-updated{font-size:12px;opacity:.9;margin-top:2px}
-.hpwx-now{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid #eef2f7;flex-wrap:wrap}
-.hpwx-now-left{min-width:110px}
-.hpwx-temp{font-size:34px;font-weight:800;color:#0f172a}
-.hpwx-desc{font-size:13px;color:#475569}
-.hpwx-now-right{flex:1;min-width:150px;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:12.5px;color:#334155}
-.hpwx-now-right b{color:#0f172a;font-weight:600}
-.hpwx-hours{display:flex;gap:8px;overflow-x:auto;padding:10px 12px;-webkit-overflow-scrolling:touch}
-.hpwx-hour{flex:0 0 auto;min-width:64px;text-align:center;background:#f1f5f9;border-radius:10px;padding:8px 6px;font-size:12px}
-.hpwx-hour .h{font-weight:700;color:#0f172a}
-.hpwx-hour .e{font-size:20px;margin:2px 0}
-.hpwx-hour .t{font-weight:700;color:#0284c7}
-.hpwx-hour .r{color:#64748b}
-.hpwx-foot{padding:8px 14px;font-size:11px;color:#94a3b8;border-top:1px solid #eef2f7}
-.hpwx-err{padding:14px;color:#b91c1c;font-size:13px}
-</style>
-<script>
-(function(){
-var SHEET_CSV="https://docs.google.com/spreadsheets/d/1nvjjRP680x_WbUbvKGbZFPeR39tyIMy0x3zFoJNA-10/export?format=csv&gid=0";
-function parseCSV(t){var rows=[],row=[],cur="",q=false;for(var i=0;i<t.length;i++){var c=t[i];if(q){if(c=='"'){if(t[i+1]=='"'){cur+='"';i++}else q=false}else cur+=c}else{if(c=='"')q=true;else if(c==','){row.push(cur);cur=""}else if(c=='\n'||c=='\r'){if(c=='\r'&&t[i+1]=='\n')i++;row.push(cur);rows.push(row);row=[];cur=""}else cur+=c}}if(cur!==""||row.length){row.push(cur);rows.push(row)}return rows.filter(function(r){return r.length>1||(r[0]&&r[0].trim()!=="")})}
-function emoji(d){d=(d||"").toLowerCase();if(/dông|sấm|chớp/.test(d))return"⛈️";if(/mưa rào|mưa to/.test(d))return"🌧️";if(/mưa/.test(d))return"🌦️";if(/nhiều mây|âm u/.test(d))return"☁️";if(/mây/.test(d))return"⛅";if(/nắng/.test(d))return"☀️";if(/trong/.test(d))return"🌤️";return"🌤️"}
-function fmtTime(s){var m=/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/.exec(s||"");return m?m[4]+":"+m[5]+" "+m[3]+"/"+m[2]:(s||"")}
-function parseHour(s){var m=/(\d{1,2})\/(\d{1,2}) (\d{1,2}):(\d{2})/.exec(s||"");if(!m)return null;var d=new Date();d.setDate(parseInt(m[1],10));d.setMonth(parseInt(m[2],10)-1);d.setHours(parseInt(m[3],10),parseInt(m[4],10),0,0);return d}
-function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
-function load(){
-fetch(SHEET_CSV+"&t="+Date.now()).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.text()}).then(function(t){
-var rows=parseCSV(t);if(rows.length<2)throw new Error("empty");
-var head=rows[0],data=rows.slice(1);
-var ci={};head.forEach(function(h,i){ci[h.trim()]=i});
-function col(r,n){return (r[ci[n]]||"").trim()}
-var crawl=col(data[0],"crawl_time");
-document.getElementById("hpwx-updated").textContent="Cập nhật: "+fmtTime(crawl);
-var now=new Date(),best=data[0],bestDiff=Infinity;
-data.forEach(function(r){var d=parseHour(col(r,"giờ"));if(!d)return;var diff=d-now;if(diff>=-36e5&&diff<bestDiff){bestDiff=diff;best=r}});
-document.getElementById("hpwx-temp").textContent=col(best,"nhiệt_độ")||"--";
-document.getElementById("hpwx-desc").textContent=col(best,"thời_tiết")||"--";
-document.getElementById("hpwx-details").innerHTML=
-"<div>Cảm nhận: <b>"+esc(col(best,"cảm_nhận"))+"</b></div>"+
-"<div>Mưa: <b>"+esc(col(best,"mưa_%"))+"</b></div>"+
-"<div>Độ ẩm: <b>"+esc(col(best,"độ_ẩm_%"))+"</b></div>"+
-"<div>Gió: <b>"+esc(col(best,"gió"))+"</b></div>";
-document.getElementById("hpwx-now").style.display="flex";
-var html="";
-data.forEach(function(r){
-var h=col(r,"giờ").split(" ")[1]||col(r,"giờ");
-html+='<div class="hpwx-hour"><div class="h">'+esc(h)+'</div><div class="e">'+emoji(col(r,"thời_tiết"))+'</div><div class="t">'+esc(col(r,"nhiệt_độ"))+'</div><div class="r">💧'+esc(col(r,"mưa_%"))+'</div></div>'});
-document.getElementById("hpwx-hours").innerHTML=html;
-}).catch(function(){document.getElementById("hpwx-updated").textContent="Chưa tải được dữ liệu, sẽ thử lại…";document.getElementById("hpwx-hours").innerHTML='<div class="hpwx-err">Không tải được dữ liệu thời tiết lúc này.</div>'});
-}
-load();setInterval(load,10*60*1000);
-})();
-</script>
+<h1>Thời tiết Hải Phòng</h1>
+<p>Cập nhật: 2026-10-19 18:00 (giờ Việt Nam) — nguồn weather.com</p>
+<table border="1" cellpadding="6" cellspacing="0">
+<thead><tr><th>giờ</th><th>nhiệt_độ</th><th>cảm_nhận</th><th>thời_tiết</th><th>mưa_%</th><th>độ_ẩm_%</th><th>gió</th><th>uv</th></tr></thead>
+<tbody>
+<tr><td>19/10 18:00</td><td>29°C</td><td>33°C</td><td>Trời trong ít mây</td><td>2%</td><td>76%</td><td>11 mph ĐĐN</td><td>0/11</td></tr>
+<tr><td>19/10 19:00</td><td>28°C</td><td>33°C</td><td>Trời trong</td><td>2%</td><td>79%</td><td>9 mph ĐĐN</td><td>0/11</td></tr>
+<tr><td>19/10 20:00</td><td>28°C</td><td>32°C</td><td>Trời trong</td><td>2%</td><td>82%</td><td>8 mph ĐĐN</td><td>0/11</td></tr>
+<tr><td>19/10 21:00</td><td>28°C</td><td>32°C</td><td>Trời trong</td><td>2%</td><td>81%</td><td>5 mph ĐĐN</td><td>0/11</td></tr>
+<tr><td>19/10 22:00</td><td>27°C</td><td>32°C</td><td>Trời trong</td><td>2%</td><td>83%</td><td>4 mph Đ</td><td>0/11</td></tr>
+<tr><td>19/10 23:00</td><td>27°C</td><td>31°C</td><td>Trời trong</td><td>2%</td><td>84%</td><td>4 mph Đ</td><td>0/11</td></tr>
+<tr><td>20/10 00:00</td><td>27°C</td><td>31°C</td><td>Trời trong ít mây</td><td>3%</td><td>85%</td><td>4 mph Đ</td><td>0/11</td></tr>
+<tr><td>20/10 01:00</td><td>27°C</td><td>31°C</td><td>Trời trong ít mây</td><td>7%</td><td>85%</td><td>3 mph Đ</td><td>0/11</td></tr>
+<tr><td>20/10 02:00</td><td>27°C</td><td>31°C</td><td>Trời trong ít mây</td><td>4%</td><td>87%</td><td>3 mph ĐĐB</td><td>0/11</td></tr>
+<tr><td>20/10 03:00</td><td>26°C</td><td>30°C</td><td>Nhiều mây</td><td>5%</td><td>88%</td><td>2 mph ĐĐB</td><td>0/11</td></tr>
+<tr><td>20/10 04:00</td><td>26°C</td><td>30°C</td><td>Trời trong ít mây</td><td>8%</td><td>91%</td><td>2 mph ĐĐB</td><td>0/11</td></tr>
+<tr><td>20/10 05:00</td><td>26°C</td><td>30°C</td><td>Trời trong ít mây</td><td>4%</td><td>91%</td><td>3 mph ĐĐB</td><td>0/11</td></tr>
+<tr><td>20/10 06:00</td><td>26°C</td><td>29°C</td><td>Trời nắng</td><td>8%</td><td>92%</td><td>3 mph ĐB</td><td>0/11</td></tr>
+<tr><td>20/10 07:00</td><td>27°C</td><td>32°C</td><td>Nhiều mây</td><td>11%</td><td>89%</td><td>3 mph ĐĐB</td><td>1/11</td></tr>
+<tr><td>20/10 08:00</td><td>28°C</td><td>34°C</td><td>Nhiều mây</td><td>12%</td><td>81%</td><td>4 mph ĐĐB</td><td>2/11</td></tr>
+<tr><td>20/10 09:00</td><td>29°C</td><td>36°C</td><td>Nhiều mây</td><td>16%</td><td>74%</td><td>5 mph Đ</td><td>5/11</td></tr>
+<tr><td>20/10 10:00</td><td>31°C</td><td>36°C</td><td>Nhiều mây</td><td>3%</td><td>68%</td><td>6 mph Đ</td><td>8/11</td></tr>
+<tr><td>20/10 11:00</td><td>32°C</td><td>37°C</td><td>Nhiều mây</td><td>1%</td><td>63%</td><td>6 mph ĐĐN</td><td>10/11</td></tr>
+<tr><td>20/10 12:00</td><td>32°C</td><td>38°C</td><td>Nhiều mây</td><td>1%</td><td>60%</td><td>7 mph ĐĐN</td><td>10/11</td></tr>
+<tr><td>20/10 13:00</td><td>32°C</td><td>38°C</td><td>Nhiều mây</td><td>1%</td><td>60%</td><td>9 mph ĐN (giật 17)</td><td>8/11</td></tr>
+<tr><td>20/10 14:00</td><td>32°C</td><td>38°C</td><td>Nhiều mây</td><td>4%</td><td>60%</td><td>9 mph ĐN (giật 17)</td><td>6/11</td></tr>
+<tr><td>20/10 15:00</td><td>32°C</td><td>37°C</td><td>Nhiều mây</td><td>2%</td><td>61%</td><td>10 mph ĐN (giật 18)</td><td>3/11</td></tr>
+<tr><td>20/10 16:00</td><td>31°C</td><td>36°C</td><td>Trời nắng</td><td>2%</td><td>63%</td><td>10 mph ĐN (giật 17)</td><td>1/11</td></tr>
+<tr><td>20/10 17:00</td><td>30°C</td><td>35°C</td><td>Nắng ấm</td><td>3%</td><td>68%</td><td>10 mph ĐĐN (giật 17)</td><td>0/11</td></tr>
+<tr><td>20/10 18:00</td><td>29°C</td><td>34°C</td><td>Trời trong</td><td>4%</td><td>74%</td><td>8 mph ĐĐN</td><td>0/11</td></tr>
+<tr><td>20/10 19:00</td><td>28°C</td><td>33°C</td><td>Trời trong</td><td>5%</td><td>77%</td><td>7 mph ĐĐN</td><td>0/11</td></tr>
+<tr><td>20/10 20:00</td><td>28°C</td><td>32°C</td><td>Trời trong</td><td>6%</td><td>80%</td><td>6 mph ĐĐN</td><td>0/11</td></tr>
+<tr><td>20/10 21:00</td><td>27°C</td><td>32°C</td><td>Trời trong</td><td>6%</td><td>82%</td><td>5 mph Đ</td><td>0/11</td></tr>
+<tr><td>20/10 22:00</td><td>27°C</td><td>31°C</td><td>Trời trong</td><td>8%</td><td>83%</td><td>4 mph Đ</td><td>0/11</td></tr>
+<tr><td>20/10 23:00</td><td>27°C</td><td>31°C</td><td>Nhiều mây</td><td>8%</td><td>85%</td><td>4 mph ĐĐB</td><td>0/11</td></tr>
+<tr><td>21/10 00:00</td><td>27°C</td><td>31°C</td><td>Trời trong ít mây</td><td>8%</td><td>85%</td><td>4 mph ĐĐB</td><td>0/11</td></tr>
+<tr><td>21/10 01:00</td><td>27°C</td><td>30°C</td><td>Trời trong ít mây</td><td>8%</td><td>86%</td><td>3 mph ĐĐB</td><td>0/11</td></tr>
+<tr><td>21/10 02:00</td><td>26°C</td><td>29°C</td><td>Trời trong ít mây</td><td>8%</td><td>87%</td><td>3 mph ĐB</td><td>0/11</td></tr>
+<tr><td>21/10 03:00</td><td>26°C</td><td>29°C</td><td>Trời trong ít mây</td><td>8%</td><td>88%</td><td>3 mph ĐB</td><td>0/11</td></tr>
+<tr><td>21/10 04:00</td><td>26°C</td><td>29°C</td><td>Trời trong ít mây</td><td>8%</td><td>90%</td><td>3 mph BĐB</td><td>0/11</td></tr>
+<tr><td>21/10 05:00</td><td>26°C</td><td>29°C</td><td>Trời trong ít mây</td><td>3%</td><td>90%</td><td>3 mph BĐB</td><td>0/11</td></tr>
+<tr><td>21/10 06:00</td><td>25°C</td><td>28°C</td><td>Trời nắng</td><td>3%</td><td>91%</td><td>4 mph BĐB</td><td>0/11</td></tr>
+<tr><td>21/10 07:00</td><td>27°C</td><td>31°C</td><td>Nhiều mây</td><td>4%</td><td>86%</td><td>4 mph BĐB</td><td>1/11</td></tr>
+<tr><td>21/10 08:00</td><td>28°C</td><td>33°C</td><td>Nhiều mây</td><td>4%</td><td>77%</td><td>4 mph ĐB</td><td>2/11</td></tr>
+<tr><td>21/10 09:00</td><td>30°C</td><td>35°C</td><td>Trời nắng</td><td>4%</td><td>71%</td><td>5 mph ĐB</td><td>5/11</td></tr>
+<tr><td>21/10 10:00</td><td>31°C</td><td>36°C</td><td>Nhiều mây</td><td>18%</td><td>66%</td><td>5 mph ĐĐB</td><td>8/11</td></tr>
+<tr><td>21/10 11:00</td><td>31°C</td><td>37°C</td><td>Mưa rào</td><td>36%</td><td>63%</td><td>5 mph Đ</td><td>9/11</td></tr>
+<tr><td>21/10 12:00</td><td>32°C</td><td>38°C</td><td>Mưa rào</td><td>56%</td><td>61%</td><td>7 mph ĐĐN</td><td>10/11</td></tr>
+<tr><td>21/10 13:00</td><td>31°C</td><td>37°C</td><td>Mưa rào</td><td>53%</td><td>64%</td><td>8 mph ĐĐN (giật 16)</td><td>8/11</td></tr>
+<tr><td>21/10 14:00</td><td>32°C</td><td>37°C</td><td>Nhiều mây</td><td>13%</td><td>64%</td><td>8 mph ĐĐN</td><td>6/11</td></tr>
+<tr><td>21/10 15:00</td><td>31°C</td><td>37°C</td><td>Nhiều mây</td><td>24%</td><td>64%</td><td>8 mph ĐĐN</td><td>3/11</td></tr>
+<tr><td>21/10 16:00</td><td>31°C</td><td>36°C</td><td>Nhiều mây</td><td>6%</td><td>66%</td><td>7 mph ĐĐN</td><td>1/11</td></tr>
+<tr><td>21/10 17:00</td><td>30°C</td><td>35°C</td><td>Nhiều mây</td><td>7%</td><td>70%</td><td>7 mph ĐĐN</td><td>0/11</td></tr>
+</tbody>
+</table>
