@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Công cụ tính lệ phí trước bạ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f4f2;
+    --card:#ffffff;
+    --text:#161a18;
+    --muted:#6b736e;
+    --line:#e2e6e2;
+    --input-bg:#f7f8f7;
+    --accent:#0b6b4f;
+    --accent-soft:#e6f2ec;
+    --result-bg:#0b6b4f;
+    --result-text:#ffffff;
+    --result-sub:rgba(255,255,255,.78);
+    --shadow:0 10px 30px rgba(20,30,25,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#101312;
+      --card:#1a1e1c;
+      --text:#eef1ef;
+      --muted:#9aa39d;
+      --line:#2b322e;
+      --input-bg:#222825;
+      --accent:#3ecf9a;
+      --accent-soft:#1d2f27;
+      --result-bg:#0e7a5a;
+      --result-text:#ffffff;
+      --result-sub:rgba(255,255,255,.8);
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Be Vietnam Pro", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100dvh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:28px 16px 40px;
+  }
+  .wrap{width:100%;max-width:520px}
+  h1{
+    font-size:26px;line-height:1.2;font-weight:800;letter-spacing:-.02em;
+    margin:6px 0 6px;text-align:center;
+  }
+  .sub{
+    text-align:center;color:var(--muted);font-size:14.5px;line-height:1.5;margin:0 0 22px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+    padding:22px 20px 20px;
+  }
+  label{
+    display:block;font-size:13px;font-weight:600;letter-spacing:.01em;
+    color:var(--muted);text-transform:uppercase;margin-bottom:8px;
+  }
+  .field{margin-bottom:18px}
+  .field:last-of-type{margin-bottom:0}
+  .input-wrap{position:relative}
+  .input-wrap input{
+    width:100%;
+    font:inherit;
+    font-size:22px;font-weight:700;
+    color:var(--text);
+    background:var(--input-bg);
+    border:1.5px solid var(--line);
+    border-radius:14px;
+    padding:14px 52px 14px 16px;
+    outline:none;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+  }
+  .input-wrap input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-soft);
+    background:var(--card);
+  }
+  .suffix{
+    position:absolute;right:16px;top:50%;transform:translateY(-50%);
+    font-size:16px;font-weight:700;color:var(--muted);pointer-events:none;
+  }
+  .row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:end}
+  .rate-field{min-width:150px}
+  .rate-field .input-wrap input{font-size:20px;padding-right:44px;text-align:center}
+  .quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .chip{
+    appearance:none;border:1px solid var(--line);background:var(--card);color:var(--text);
+    font:inherit;font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;cursor:pointer;
+  }
+  .chip:active{transform:scale(.98)}
+  .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+  @media (prefers-color-scheme: dark){ .chip[aria-pressed="true"]{color:var(--accent)} }
+
+  .result{
+    margin-top:22px;
+    background:var(--result-bg);
+    color:var(--result-text);
+    border-radius:16px;
+    padding:20px 18px 18px;
+    text-align:center;
+  }
+  .result-label{font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--result-sub)}
+  .result-value{
+    font-size:38px;line-height:1.1;font-weight:800;letter-spacing:-.03em;
+    margin:8px 0 6px;font-variant-numeric:tabular-nums;word-break:break-word;
+  }
+  .result-value small{font-size:20px;font-weight:700}
+  .formula{font-size:13.5px;color:var(--result-sub);font-variant-numeric:tabular-nums;line-height:1.5}
+  .note{
+    margin:16px 4px 0;font-size:13px;line-height:1.6;color:var(--muted);text-align:center;
+  }
+  .note strong{color:var(--text)}
+  /* remove number spinners */
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input[type=number]{-moz-appearance:textfield;appearance:textfield}
+  @media (max-width:420px){
+    h1{font-size:23px}
+    .result-value{font-size:32px}
+    .row{grid-template-columns:1fr}
+    .rate-field{min-width:0}
+    .rate-field .input-wrap input{text-align:left}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Tính lệ phí trước bạ</h1>
+  <p class="sub">Nhập giá xe — phí hiện ra ngay, không cần bấm nút.</p>
+
+  <section class="card" aria-label="Máy tính lệ phí trước bạ">
+    <div class="field">
+      <label for="price">Giá xe</label>
+      <div class="input-wrap">
+        <input id="price" type="text" inputmode="numeric" autocomplete="off" value="23.000.000" aria-describedby="formulaText" />
+        <span class="suffix">đ</span>
+      </div>
+      <div class="quick" aria-label="Chọn nhanh giá xe">
+        <button type="button" class="chip" data-price="15000000">15 triệu</button>
+        <button type="button" class="chip" data-price="20000000">20 triệu</button>
+        <button type="button" class="chip" data-price="23000000">23 triệu</button>
+        <button type="button" class="chip" data-price="30000000">30 triệu</button>
+        <button type="button" class="chip" data-price="50000000">50 triệu</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field rate-field">
+        <label for="rate">Tỷ lệ trước bạ</label>
+        <div class="input-wrap">
+          <input id="rate" type="text" inputmode="decimal" autocomplete="off" value="2" />
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div style="padding-bottom:2px">
+        <div class="quick" style="margin-top:0" aria-label="Chọn nhanh tỷ lệ">
+          <button type="button" class="chip rate-chip" data-rate="1">1%</button>
+          <button type="button" class="chip rate-chip" data-rate="2" aria-pressed="true">2%</button>
+          <button type="button" class="chip rate-chip" data-rate="5">5%</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="result" role="status" aria-live="polite">
+      <div class="result-label">Lệ phí trước bạ phải nộp</div>
+      <div class="result-value" id="resultValue">460.000 <small>đ</small></div>
+      <div class="formula" id="formulaText">23.000.000 đ × 2% = 460.000 đ</div>
+    </div>
+  </section>
+
+  <p class="note">Mặc định <strong>2%</strong> — mức xe máy đăng ký lần đầu. Đổi sang <strong>1%</strong> nếu là sang tên từ lần thứ 2. Giá tính phí lấy theo giá trên hóa đơn / thông báo của cơ quan thuế.</p>
+</main>
+
+<script>
+  var priceEl = document.getElementById('price');
+  var rateEl = document.getElementById('rate');
+  var resultEl = document.getElementById('resultValue');
+  var formulaEl = document.getElementById('formulaText');
+  var fmt = new Intl.NumberFormat('vi-VN');
+
+  function parsePrice(str){
+    if(!str) return 0;
+    var digits = String(str).replace(/[^\d]/g,'');
+    if(!digits) return 0;
+    return parseInt(digits,10);
+  }
+  function parseRate(str){
+    if(str === null || str === undefined) return 0;
+    var s = String(str).trim().replace(',','.');
+    var n = parseFloat(s);
+    if(isNaN(n) || n < 0) return 0;
+    return n;
+  }
+  function formatRate(n){
+    // show without unnecessary trailing zeros, vi decimal comma
+    var s = String(n);
+    return s.replace('.', ',');
+  }
+  function calc(){
+    var price = parsePrice(priceEl.value);
+    var rate = parseRate(rateEl.value);
+    var fee = Math.round(price * rate / 100);
+    resultEl.innerHTML = fmt.format(fee) + ' <small>đ</small>';
+    formulaEl.textContent = fmt.format(price) + ' đ × ' + formatRate(rate) + '% = ' + fmt.format(fee) + ' đ';
+    // sync rate chips
+    var chips = document.querySelectorAll('.rate-chip');
+    for(var i=0;i<chips.length;i++){
+      var r = parseFloat(chips[i].getAttribute('data-rate'));
+      chips[i].setAttribute('aria-pressed', r === rate ? 'true' : 'false');
+    }
+  }
+  function formatPriceInput(){
+    var price = parsePrice(priceEl.value);
+    if(priceEl.value.trim() === ''){
+      // keep empty while typing cleared
+      return;
+    }
+    // preserve caret roughly by reformatting only on blur/input end - simple approach: reformat
+    var formatted = fmt.format(price);
+    if(priceEl.value !== formatted){
+      priceEl.value = formatted;
+    }
+  }
+
+  priceEl.addEventListener('input', function(){
+    formatPriceInput();
+    calc();
+  });
+  priceEl.addEventListener('blur', function(){
+    if(priceEl.value.trim()===''){ priceEl.value='0'; }
+    formatPriceInput(); calc();
+  });
+  rateEl.addEventListener('input', calc);
+  rateEl.addEventListener('blur', function(){
+    var r = parseRate(rateEl.value);
+    rateEl.value = formatRate(r);
+    calc();
+  });
+
+  var priceChips = document.querySelectorAll('[data-price]');
+  for(var i=0;i<priceChips.length;i++){
+    priceChips[i].addEventListener('click', function(){
+      var v = parseInt(this.getAttribute('data-price'),10);
+      priceEl.value = fmt.format(v);
+      calc();
+      priceEl.focus();
+    });
+  }
+  var rateChips = document.querySelectorAll('.rate-chip');
+  for(var j=0;j<rateChips.length;j++){
+    rateChips[j].addEventListener('click', function(){
+      rateEl.value = this.getAttribute('data-rate');
+      calc();
+    });
+  }
+
+  calc();
+</script>
+</body>
+</html>
